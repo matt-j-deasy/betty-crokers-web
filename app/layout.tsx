@@ -18,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/dashboard">Dashboard</Link>
                 <Link href="/matches/new">Score</Link>
                 <Link href="/players">Players</Link>
+                <Link href="/leagues">Leagues</Link>
                 <UserMenu />
               </nav>
             </div>

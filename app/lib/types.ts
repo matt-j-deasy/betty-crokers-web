@@ -11,11 +11,10 @@ export interface User {
 }
 
 export interface League {
-  id: ID;
-  name: string;
-  slug: string;
-  createdAt: string;
-  updatedAt: string;
+  ID: ID;
+  Name: string;
+  CreatedAt: string;
+  UpdatedAt: string;
 }
 
 export interface Season {
@@ -83,3 +82,14 @@ export interface Match {
 }
 
 export type Envelope<T> = { data: T; total: number; page: number; size: number };
+
+export type SessionWithUser = {
+  user?: SessionUserWithRole;
+}
+
+export type SessionUserWithRole = {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role?: string | null;
+};
