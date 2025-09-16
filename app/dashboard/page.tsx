@@ -1,13 +1,9 @@
 import StatCard from "../components/StatCard";
-import { serverFetch } from "../lib/api";
 
 type Count = { count: number };
 
 export default async function Dashboard() {
   const results = await Promise.allSettled<Count>([
-    serverFetch<Count>("/players/count"),
-    serverFetch<Count>("/teams/count"),
-    serverFetch<Count>("/matches/count"),
   ]);
 
   const [players, teams, matches] = results.map((r, idx) => {

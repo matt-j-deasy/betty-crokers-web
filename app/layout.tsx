@@ -17,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <nav className="flex items-center gap-4 text-sm">
                 <Link href="/dashboard">Dashboard</Link>
                 <Link href="/matches/new">Score</Link>
+                <Link href="/players">Players</Link>
                 <UserMenu />
               </nav>
             </div>

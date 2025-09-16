@@ -1,41 +1,38 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "./auth";
+import { headers } from "next/headers";
 
-const BASE = process.env.GO_SERVER_URL!;
+/** Works in RSC, server actions, and route handlers */
+export async function getRequestBaseUrl(): Promise<string> {
+  // NOTE: headers() is async in your setup
+  const h = await headers();
+  const proto = h.get("x-forwarded-proto") ?? "http";
+  const host = h.get("x-forwarded-host") ?? h.get("host");
 
-type FetchOptions = Omit<RequestInit, "headers"> & { headers?: Record<string, string> };
-
-export async function serverFetch<T>(path: string, opts: FetchOptions = {}): Promise<T> {
-  const session = await getServerSession(authOptions);
-  const token = (session as any)?.token as string | undefined;
-
-  const res = await fetch(`${BASE}${path}`, {
-    ...opts,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(opts.headers || {})
-    },
-    // SSR fetch with caching disabled by default for freshness
-    cache: "no-store"
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`API ${res.status}: ${text || res.statusText}`);
+  // Fallbacks for non-request contexts (e.g., static gen hooks)
+  if (!host) {
+    return (
+      process.env.NEXT_PUBLIC_APP_URL ??
+      process.env.NEXTAUTH_URL ??
+      "http://localhost:3000"
+    );
   }
-  return res.json() as Promise<T>;
+  return `${proto}://${host}`;
 }
 
-// Client-side fetcher for SWR (token provided by NextAuth session route cookie)
-export async function clientFetch<T>(path: string, opts: FetchOptions = {}): Promise<T> {
-  const res = await fetch(`/api${path}`, {
-    ...opts,
-    headers: { "Content-Type": "application/json", ...(opts.headers || {}) }
-  });
+type ApiInit = RequestInit;
+
+export async function apiFetch(path: string, init: ApiInit = {}) {
+  const base = await getRequestBaseUrl();
+  const url = path.startsWith("http")
+    ? path
+    : `${base}${path.startsWith("/") ? "" : "/"}${path}`;
+  return fetch(url, { cache: "no-store", ...init });
+}
+
+export async function apiGetJson<T>(path: string, init: ApiInit = {}) {
+  const res = await apiFetch(path, init);
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`API ${res.status}: ${text || res.statusText}`);
+    // Up to you: throw to trip RSC error boundary, or soft-fail
+    throw new Error(`Request failed ${res.status}: ${path}`);
   }
-  return res.json() as Promise<T>;
+  return (await res.json()) as T;
 }

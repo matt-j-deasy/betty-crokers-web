@@ -39,16 +39,15 @@ export interface Team {
   updatedAt: string;
 }
 
-export interface Player {
-  id: ID;
-  userId?: ID | null;
-  leagueId?: ID | null;
-  displayName: string;
-  bio?: string | null;
-  avatarUrl?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type Player = {
+  ID: number;
+  UserID?: number | null;
+  Nickname: string;
+  FirstName?: string | null;
+  LastName?: string | null;
+  CreatedAt?: string;
+  UpdatedAt?: string;
+};
 
 export type MatchType = "SINGLES" | "TEAMS";
 export type Side = "A" | "B";
@@ -82,3 +81,5 @@ export interface Match {
   createdAt: string;
   updatedAt: string;
 }
+
+export type Envelope<T> = { data: T; total: number; page: number; size: number };
