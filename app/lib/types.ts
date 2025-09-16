@@ -18,12 +18,13 @@ export interface League {
 }
 
 export interface Season {
-  id: ID;
-  leagueId: ID;
-  name: string;
-  slug: string;
-  startsAt: string;
-  endsAt: string;
+  ID: ID;
+  LeagueID: ID;
+  Name: string;
+  StartsOn: string;
+  EndsOn: string;
+  Timezone: string;
+  Description?: string | null;
   createdAt: string;
   updatedAt: string;
 }
