@@ -1,14 +1,14 @@
-// NO "use client" here
+// ...imports above unchanged...
+import { Envelope, SessionWithUser, Season, Game, GameWithSides, Side } from "@/app/lib/types";
 import { Suspense } from "react";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/lib/auth";
-import { apiGetJson } from "@/app/lib/api";
-import { Envelope, SessionWithUser, Season, Game, GameWithSides } from "@/app/lib/types";
 import GameCreateForm from "./ui/GameCreateForm";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../lib/auth";
+import { apiGetJson } from "../lib/api";
+import Link from "next/link";
 
 export const metadata = { title: "Games — Betty Crockers" };
 
-// Keep it simple: fetch last N games for now. You can add filters later.
 async function fetchGames(): Promise<Game[]> {
   const payload = await apiGetJson<Envelope<Game[]>>("/api/games?size=25").catch(() => ({
     data: [],
@@ -19,6 +19,10 @@ async function fetchGames(): Promise<Game[]> {
   return payload.data;
 }
 
+async function fetchGameWithSides(id: number): Promise<GameWithSides | null> {
+  return apiGetJson<GameWithSides>(`/api/games/${id}/with-sides`).catch(() => null);
+}
+
 async function fetchSeasons(): Promise<Season[]> {
   const payload = await apiGetJson<Envelope<Season[]>>("/api/seasons").catch(() => ({
     data: [],
@@ -27,11 +31,6 @@ async function fetchSeasons(): Promise<Season[]> {
     size: 0,
   }));
   return payload.data;
-}
-
-async function fetchGameWithSides(id: number): Promise<GameWithSides | null> {
-  // Next proxy to Go: GET /api/games/:id/with-sides
-  return apiGetJson<GameWithSides>(`/api/games/${id}/with-sides`).catch(() => null);
 }
 
 async function fetchTeams(): Promise<Array<{ ID: number; Name: string }>> {
@@ -47,21 +46,28 @@ function teamName(teamId?: number, teamsById?: Map<string, { ID: number; Name: s
   return t?.Name ?? `Team #${teamId}`;
 }
 
-function renderTeamsCell(g: GameWithSides, teamsById: Map<string, { ID: number; Name: string }>) {
+function pickSide(sides: Side[] | undefined, which: "A" | "B"): Side | undefined {
+  return sides?.find((s) => s.Side === which);
+}
+
+function renderTeamsCell(gws: GameWithSides, teamsById: Map<string, { ID: number; Name: string }>) {
+  const g = gws.game;
+
   if (g.MatchType === "players") {
-    // You can extend similarly for players if needed
+    // Optional: map player names with a playersById lookup as you did for teams
     return <span className="opacity-60">Players match</span>;
   }
 
-  const a = g.Sides?.find((s) => s.Side === "A");
-  const b = g.Sides?.find((s) => s.Side === "B");
+  const a = pickSide(gws.sides, "A");
+  const b = pickSide(gws.sides, "B");
 
-  const aName = teamName(a?.TeamId, teamsById);
-  const bName = teamName(b?.TeamId, teamsById);
+  const aName = teamName(a?.TeamID, teamsById);
+  const bName = teamName(b?.TeamID, teamsById);
   const aPts = a?.Points ?? 0;
   const bPts = b?.Points ?? 0;
 
   const isCompleted = g.Status === "completed" || !!g.WinnerSide;
+
   if (!isCompleted) {
     return (
       <div className="flex items-center gap-2">
@@ -77,28 +83,40 @@ function renderTeamsCell(g: GameWithSides, teamsById: Map<string, { ID: number; 
     );
   }
 
-  const aWon = g.WinnerSide === "A" || aPts > bPts;
-  const bWon = g.WinnerSide === "B" || bPts > aPts;
+  // Prefer explicit WinnerSide, fall back to points
+  const aWon = g.WinnerSide ? g.WinnerSide === "A" : aPts > bPts;
+  const bWon = g.WinnerSide ? g.WinnerSide === "B" : bPts > aPts;
 
   return (
     <div className="flex items-center gap-2">
       <span className={aWon ? "font-semibold" : "opacity-70"}>
         {aName}
         <span className="ml-1 text-xs opacity-70">({aPts})</span>
-        {aWon && <span className="ml-2 rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800">Winner</span>}
+        {aWon && (
+          <span className="ml-2 rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800">Winner</span>
+        )}
       </span>
       <span className="opacity-50">vs</span>
       <span className={bWon ? "font-semibold" : "opacity-70"}>
         {bName}
         <span className="ml-1 text-xs opacity-70">({bPts})</span>
-        {bWon && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-800">Loser</span>}
+        {bWon && (
+          <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-800">Loser</span>
+        )}
       </span>
     </div>
   );
 }
 
+function fmt(dt?: string | null) {
+  if (!dt) return "—";
+  const d = new Date(dt);
+  return isNaN(+d) ? "—" : d.toLocaleString();
+}
+
 async function GamesTable() {
   const [games, seasons] = await Promise.all([fetchGames(), fetchSeasons()]);
+
   if (games.length === 0) {
     return (
       <div className="rounded-lg border p-6 text-sm text-neutral-600 bg-white">
@@ -107,14 +125,13 @@ async function GamesTable() {
     );
   }
 
-  // Pull sides for each game in parallel
+  // Expand each game to { Game, Sides }
   const expanded = await Promise.all(games.map((g) => fetchGameWithSides(g.ID)));
-  const gamesWithSides = games.map((g, i) => expanded[i] ?? g);
+  // Use expanded when available, else wrap bare Game into the shape
+  const gamesWithSides: GameWithSides[] = games.map((g, i) => expanded[i] ?? { game: g, sides: [] });
 
-  // One teams lookup used for name mapping
   const teams = await fetchTeams();
   const teamsById = new Map(teams.map((t) => [String(t.ID), t]));
-
   const seasonById = new Map(seasons.map((s) => [String(s.ID), s]));
 
   return (
@@ -122,6 +139,7 @@ async function GamesTable() {
       <table className="w-full text-sm">
         <thead className="bg-neutral-100 text-left text-xs uppercase tracking-wider">
           <tr>
+            <th className="px-4 py-2">When</th>
             <th className="px-4 py-2">Season</th>
             <th className="px-4 py-2">Teams</th>
             <th className="px-4 py-2">Target</th>
@@ -130,21 +148,27 @@ async function GamesTable() {
           </tr>
         </thead>
         <tbody>
-          {gamesWithSides.map((g) => (
-            <tr key={g.ID} className="border-t hover:bg-neutral-50">
-              <td className="px-4 py-2">
-                {g.SeasonID
-                  ? seasonById.get(String(g.SeasonID))?.Name ?? `Season #${g.SeasonID}`
-                  : "Exhibition"}
-              </td>
-              <td className="px-4 py-2">
-                {renderTeamsCell(g as GameWithSides, teamsById)}
-              </td>
-              <td className="px-4 py-2">{g.TargetPoints ?? 100}</td>
-              <td className="px-4 py-2 capitalize">{g.Status ?? "scheduled"}</td>
-              <td className="px-4 py-2">{g.Location ?? "—"}</td>
-            </tr>
-          ))}
+          {gamesWithSides.map((gws) => {
+            const g = gws.game;
+            return (
+              <tr key={g.ID} className="border-t hover:bg-neutral-50">
+                <td className="px-4 py-2">{fmt(g.ScheduledAt)}</td>
+                <td className="px-4 py-2">
+                  {g.SeasonID
+                    ? seasonById.get(String(g.SeasonID))?.Name ?? `Season #${g.SeasonID}`
+                    : "Exhibition"}
+                </td>
+                <td className="px-4 py-2">
+                  <Link href={`/games/${gws.game.ID}`} className="hover:underline">
+                    {renderTeamsCell(gws, teamsById)}
+                  </Link>
+                </td>
+                <td className="px-4 py-2">{g.TargetPoints ?? 100}</td>
+                <td className="px-4 py-2 capitalize">{g.Status ?? "scheduled"}</td>
+                <td className="px-4 py-2">{g.Location ?? "—"}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -159,7 +183,6 @@ export default async function GamesPage() {
     <section className="space-y-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Games</h1>
-        {/* Future: filters for season/status/date range */}
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

@@ -81,6 +81,7 @@ export interface Game {
   Location?: string | null;
   Description?: string | null;
   Status?: "scheduled" | "in_progress" | "completed" | "canceled";
+  WinnerSide?: "A" | "B" | null;
 
   CreatedAt: string;
   UpdatedAt: string;
@@ -91,8 +92,8 @@ export type Side = {
   ID: number;
   GameID: number;
   Side: "A" | "B";
-  TeamId?: number;
-  playerId?: number;
+  TeamID?: number;
+  PlayerID?: number;
   Points?: number;
   Color?: "white" | "black" | "natural" | null;
   CreatedAt: string;
@@ -100,9 +101,9 @@ export type Side = {
   DeletedAt?: string | null;
 };
 
-export type GameWithSides = Game & {
-  Sides?: Side[];
-  WinnerSide?: "A" | "B" | null;
+export type GameWithSides = {
+  game: Game;
+  sides?: Side[];
 };
 
 export type Envelope<T> = { data: T; total: number; page: number; size: number };
