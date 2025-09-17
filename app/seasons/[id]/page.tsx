@@ -85,7 +85,8 @@ async function SeasonTeams({ id }: { id: string }) {
   );
 }
 
-export default async function SeasonPage({ params }: { params: { id: string } }) {
+export default async function SeasonPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const season = await fetchSeason(params.id);
   if (!season) return notFound();
 

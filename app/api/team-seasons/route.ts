@@ -1,18 +1,25 @@
-// app/api/seasons/[id]/route.ts
+// app/api/team-seasons/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
 
 const BASE = process.env.GO_SERVER_URL!;
 
-export async function GET(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   const token = (session as any)?.token as string | undefined;
 
-  const upstream = await fetch(`${BASE}/seasons/${params.id}`, {
-    cache: "no-store",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  if (!token || (session as any)?.expired) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const upstream = await fetch(`${BASE}/team-seasons`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: await req.text(),
   });
 
   const text = await upstream.text();
