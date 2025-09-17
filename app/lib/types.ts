@@ -29,15 +29,37 @@ export interface Season {
   updatedAt: string;
 }
 
+// lib/types.ts
+
 export interface Team {
-  id: ID;
-  leagueId: ID;
-  seasonId?: ID | null;
-  name: string;
-  slug: string;
-  createdAt: string;
-  updatedAt: string;
+  ID: number;
+  Name: string;
+  Description?: string | null;
+
+  PlayerAID: number;
+  PlayerBID: number;
+
+  CreatedAt: string;
+  UpdatedAt: string;
+  DeletedAt?: string | null;
 }
+
+export interface TeamWithPlayers extends Team {
+  PlayerA?: Player;
+  PlayerB?: Player;
+}
+
+export interface TeamSeason {
+  ID: number;
+  TeamID: number;
+  SeasonID: number;
+  IsActive: boolean;
+
+  CreatedAt: string;
+  UpdatedAt: string;
+  DeletedAt?: string | null;
+}
+
 
 export type Player = {
   ID: number;

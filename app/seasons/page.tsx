@@ -5,6 +5,7 @@ import { authOptions } from "@/app/lib/auth";
 import SeasonCreateForm from "./ui/SeasonCreateForm";
 import { Envelope, League, Season, SessionWithUser } from "../lib/types";
 import { apiGetJson } from "../lib/api";
+import Link from "next/link";
 
 export const metadata = { title: "Seasons — Betty Crockers" };
 
@@ -47,13 +48,17 @@ async function SeasonList() {
         const league = leagueById.get(String(s.LeagueID));
         return (
           <li key={s.ID} className="flex items-center justify-between p-4">
-            <div className="flex flex-col">
-              <div className="font-medium">{s.Name}</div>
-              <div className="text-xs text-neutral-600">
-                League: {league?.Name ?? "—"}
+            <Link
+              href={`/seasons/${s.ID}`}
+              className="flex items-center justify-between p-4 hover:bg-neutral-50"
+            >
+              <div className="flex flex-col">
+                <div className="font-medium">{s.Name}</div>
+                <div className="text-xs text-neutral-600">
+                  League: {league?.Name ?? "—"}
+                </div>
               </div>
-            </div>
-            {/* Extend with dates/status/actions as needed */}
+            </Link>
           </li>
         );
       })}
