@@ -1,24 +1,18 @@
 // app/api/games/[id]/sides/[side]/points/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/lib/auth";
-const BASE = process.env.GO_SERVER_URL!;
+import { NextRequest } from "next/server";
+import { apiFetch, proxyUpstream } from "@/app/lib/api";
+
 export async function PUT(
   req: NextRequest,
-  props: { params: Promise<{ id: string; side: "A"|"B" }> }
+  props: { params: Promise<{ id: string; side: "A" | "B" }> }
 ) {
-  const params = await props.params;
-  const session = await getServerSession(authOptions);
-  const token = (session as any)?.token as string | undefined;
-  if (!token || (session as any)?.expired) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { id, side } = await props.params;
 
-  const upstream = await fetch(`${BASE}/games/${params.id}/sides/${params.side}/points`, {
+  const upstream = await apiFetch(`/games/${id}/sides/${side}/points`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json" },
     body: await req.text(),
   });
-  const text = await upstream.text();
-  const ct = upstream.headers.get("content-type") ?? "application/json";
-  return new NextResponse(text, { status: upstream.status, headers: { "Content-Type": ct } });
-}
 
+  return proxyUpstream(upstream);
+}

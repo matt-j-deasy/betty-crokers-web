@@ -1,4 +1,3 @@
-// NO "use client" here
 import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
@@ -21,7 +20,7 @@ async function fetchTeams(): Promise<Team[]> {
 async function fetchPlayers(): Promise<Player[]> {
   // Used for rendering player names in the list (avoid N+1 client round-trips)
   // Increase size as needed; if large, replace with server join or DTO denorm.
-  const payload = await apiGetJson<Envelope<Player[]>>("/api/players?size=100").catch(() => ({
+  const payload = await apiGetJson<Envelope<Player[]>>("/players?size=100").catch(() => ({
     data: [],
     total: 0,
     page: 1,

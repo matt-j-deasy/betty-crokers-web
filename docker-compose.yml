@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # args: # only if you need build-time public flags
+      #   NEXT_PUBLIC_SOME_FLAG: "true"
+    image: your-org/league-ui:latest
+    environment:
+      PORT: "3000"
+      NODE_ENV: "production"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "replace-with-a-long-random-string"
+      NEXTAUTH_TRUST_HOST: "true"
+
+      # server-side (from inside the container)
+      SERVER_API_BASE: "http://host.docker.internal:8080/api/v1"  # or http://api:8080/api/v1 if same compose
+
+      # client-side (browser)
+      NEXT_PUBLIC_API_BASE: "http://localhost:8080/api/v1"
+    ports:
+      - "3000:3000"

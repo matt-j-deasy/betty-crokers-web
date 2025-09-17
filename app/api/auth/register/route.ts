@@ -1,18 +1,15 @@
 // app/api/auth/register/route.ts
-import { NextResponse } from "next/server";
-
-const BASE = process.env.GO_SERVER_URL!;
+import { apiFetch, proxyUpstream } from "@/app/lib/api";
 
 export async function POST(req: Request) {
   const body = await req.text();
 
-  const res = await fetch(`${BASE}/auth/register`, {
+  const upstream = await apiFetch("/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body
+    body,
+    auth: false, // registration usually doesn't need an auth token
   });
 
-  const text = await res.text();
-  const contentType = res.headers.get("content-type") || "application/json";
-  return new NextResponse(text, { status: res.status, headers: { "Content-Type": contentType } });
+  return proxyUpstream(upstream);
 }

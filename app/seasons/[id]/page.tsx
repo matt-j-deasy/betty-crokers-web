@@ -1,4 +1,3 @@
-// NO "use client" here
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -10,13 +9,13 @@ export const metadata = { title: "Season — Betty Crockers" };
 
 async function fetchSeason(id: string): Promise<Season | null> {
   // Assuming GET /api/seasons/:id exists via proxy below; otherwise swap to list+find.
-  const res = await apiGetJson<Season>(`/api/seasons/${id}`).catch(() => null);
+  const res = await apiGetJson<Season>(`/seasons/${id}`).catch(() => null);
   return res ?? null;
 }
 
 async function fetchPlayers(): Promise<Player[]> {
   // If your roster is large, add pagination or a q param; cap size reasonably.
-  const payload = await apiGetJson<Envelope<Player[]>>(`/api/players?size=1000`).catch(() => ({
+  const payload = await apiGetJson<Envelope<Player[]>>(`/players?size=1000`).catch(() => ({
     data: [],
     total: 0,
     page: 1,
@@ -26,7 +25,7 @@ async function fetchPlayers(): Promise<Player[]> {
 }
 
 async function fetchSeasonTeams(id: string): Promise<Team[]> {
-  const payload = await apiGetJson<Envelope<Team[]>>(`/api/seasons/${id}/teams`).catch(() => ({
+  const payload = await apiGetJson<Envelope<Team[]>>(`/seasons/${id}/teams`).catch(() => ({
     data: [],
     total: 0,
     page: 1,

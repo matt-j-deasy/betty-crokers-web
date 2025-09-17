@@ -1,4 +1,3 @@
-// NO "use client" here
 import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
@@ -10,7 +9,7 @@ import Link from "next/link";
 export const metadata = { title: "Seasons — Betty Crockers" };
 
 async function fetchSeasons(): Promise<Season[]> {
-  const payload = await apiGetJson<Envelope<Season[]>>("/api/seasons").catch(() => ({
+  const payload = await apiGetJson<Envelope<Season[]>>("/seasons").catch(() => ({
     data: [],
     total: 0,
     page: 1,
@@ -20,7 +19,7 @@ async function fetchSeasons(): Promise<Season[]> {
 }
 
 async function fetchLeagues(): Promise<League[]> {
-  const payload = await apiGetJson<Envelope<League[]>>("/api/leagues").catch(() => ({
+  const payload = await apiGetJson<Envelope<League[]>>("/leagues").catch(() => ({
     data: [],
     total: 0,
     page: 1,

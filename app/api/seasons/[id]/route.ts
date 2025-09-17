@@ -1,21 +1,16 @@
 // app/api/seasons/[id]/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/lib/auth";
+import { NextRequest } from "next/server";
+import { apiFetch, proxyUpstream } from "@/app/lib/api";
 
-const BASE = process.env.GO_SERVER_URL!;
+export async function GET(
+  _req: NextRequest,
+  props: { params: Promise<{ id: string }> }
+) {
+  const { id } = await props.params;
 
-export async function GET(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
-  const session = await getServerSession(authOptions);
-  const token = (session as any)?.token as string | undefined;
-
-  const upstream = await fetch(`${BASE}/seasons/${params.id}`, {
+  const upstream = await apiFetch(`/seasons/${id}`, {
     cache: "no-store",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
-  const text = await upstream.text();
-  const ct = upstream.headers.get("content-type") ?? "application/json";
-  return new NextResponse(text, { status: upstream.status, headers: { "Content-Type": ct } });
+  return proxyUpstream(upstream);
 }

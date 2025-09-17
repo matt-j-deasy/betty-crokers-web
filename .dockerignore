@@ -1,0 +1,20 @@
+# node / next
+node_modules
+.next
+out
+dist
+.cache
+npm-debug.log*
+yarn-error.log*
+.pnp*
+.pnpm-store
+
+# env and local junk
+.env*
+!.env.example
+.DS_Store
+
+# vcs and editor
+.git
+.gitignore
+.vscode

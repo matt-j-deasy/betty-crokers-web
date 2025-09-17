@@ -1,4 +1,3 @@
-// NO "use client" here
 import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
@@ -9,7 +8,7 @@ import { apiGetJson } from "../lib/api";
 export const metadata = { title: "Leagues — Betty Crockers" };
 
 async function fetchLeagues(): Promise<League[]> {
-  const payload = await apiGetJson<Envelope<League[]>>("/api/leagues").catch(() => ({
+  const payload = await apiGetJson<Envelope<League[]>>("/leagues").catch(() => ({
     data: [],
     total: 0,
     page: 1,
@@ -18,7 +17,6 @@ async function fetchLeagues(): Promise<League[]> {
   return payload.data;
 }
 
-// Async server component used under Suspense
 async function LeagueList() {
   const leagues = await fetchLeagues();
   if (leagues.length === 0) {

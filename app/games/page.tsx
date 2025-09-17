@@ -1,4 +1,3 @@
-// ...imports above unchanged...
 import { Envelope, SessionWithUser, Season, Game, GameWithSides, Side } from "@/app/lib/types";
 import { Suspense } from "react";
 import GameCreateForm from "./ui/GameCreateForm";
@@ -10,7 +9,7 @@ import Link from "next/link";
 export const metadata = { title: "Games — Betty Crockers" };
 
 async function fetchGames(): Promise<Game[]> {
-  const payload = await apiGetJson<Envelope<Game[]>>("/api/games?size=25").catch(() => ({
+  const payload = await apiGetJson<Envelope<Game[]>>("/games?size=25").catch(() => ({
     data: [],
     total: 0,
     page: 1,
@@ -20,11 +19,11 @@ async function fetchGames(): Promise<Game[]> {
 }
 
 async function fetchGameWithSides(id: number): Promise<GameWithSides | null> {
-  return apiGetJson<GameWithSides>(`/api/games/${id}/with-sides`).catch(() => null);
+  return apiGetJson<GameWithSides>(`/games/${id}/with-sides`).catch(() => null);
 }
 
 async function fetchSeasons(): Promise<Season[]> {
-  const payload = await apiGetJson<Envelope<Season[]>>("/api/seasons").catch(() => ({
+  const payload = await apiGetJson<Envelope<Season[]>>("/seasons").catch(() => ({
     data: [],
     total: 0,
     page: 1,
@@ -34,7 +33,7 @@ async function fetchSeasons(): Promise<Season[]> {
 }
 
 async function fetchTeams(): Promise<Array<{ ID: number; Name: string }>> {
-  const payload = await apiGetJson<Envelope<Array<{ ID: number; Name: string }>>>("/api/teams?size=500").catch(
+  const payload = await apiGetJson<Envelope<Array<{ ID: number; Name: string }>>>("/teams?size=500").catch(
     () => ({ data: [], total: 0, page: 1, size: 0 })
   );
   return payload.data;

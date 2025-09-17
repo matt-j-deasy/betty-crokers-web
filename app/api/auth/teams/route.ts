@@ -1,26 +1,16 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/lib/auth";
-const BASE = process.env.GO_SERVER_URL!;
+// app/api/teams/route.ts
+import { apiFetch, proxyUpstream } from "@/app/lib/api";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  const token = (session as any)?.token;
-  const res = await fetch(`${BASE}/teams`, { headers: { Authorization: token ? `Bearer ${token}` : "" } });
-  const body = await res.text();
-  return new NextResponse(body, { status: res.status, headers: { "Content-Type": "application/json" } });
+  const upstream = await apiFetch("/teams", { cache: "no-store" });
+  return proxyUpstream(upstream);
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const token = (session as any).token;
-  const res = await fetch(`${BASE}/teams`, {
+  const upstream = await apiFetch("/teams", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: await req.text()
+    headers: { "Content-Type": "application/json" },
+    body: await req.text(),
   });
-  const body = await res.text();
-  return new NextResponse(body, { status: res.status, headers: { "Content-Type": "application/json" } });
+  return proxyUpstream(upstream);
 }

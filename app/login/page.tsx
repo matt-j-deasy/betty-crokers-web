@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import LoginForm from "../components/auth/LoginForm";
 
 
@@ -8,7 +9,9 @@ export default function LoginPage() {
     <main className="min-h-[70vh] grid place-items-center p-8">
       <div className="w-full max-w-sm space-y-6">
         <h1 className="text-3xl font-bold text-center">Sign in</h1>
-        <LoginForm />
+        <Suspense>
+          <LoginForm />
+        </Suspense>
       </div>
     </main>
   );

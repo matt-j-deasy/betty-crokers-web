@@ -1,6 +1,15 @@
 import { type NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
+const isServer = typeof window === "undefined";
+const SERVER_API_BASE = process.env.SERVER_API_BASE!;
+const PUBLIC_API_BASE  = process.env.NEXT_PUBLIC_API_BASE!;
+
+// Helper to pick correct base
+function apiBase() {
+  return isServer ? SERVER_API_BASE : PUBLIC_API_BASE;
+}
+
 /**
  * We copy selected fields from Go response into the NextAuth JWT.
  * - token.goToken: the raw JWT from Go
@@ -12,54 +21,40 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   providers: [
     Credentials({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
-      },
-      async authorize(creds) {
-        if (!creds?.email || !creds?.password) return null;
+  name: "Credentials",
+  credentials: { email: { }, password: { } },
+  async authorize(creds) {
+    if (!creds?.email || !creds?.password) return null;
 
-        const res = await fetch(`${process.env.GO_SERVER_URL}/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: creds.email, password: creds.password })
-        });
+    // Server-side call to API
+    const url = `${apiBase()}/auth/login`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: creds.email, password: creds.password }),
+    });
 
-        if (!res.ok) return null;
+    if (!res.ok) {
+      return null;
+    }
 
-        // Payload shape:
-        // {
-        //   expiresAt: "2025-09-15T22:13:16Z",
-        //   token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9....",
-        //   user: { ID, Email, Name, PasswordHash, Role, Image, CreatedAt, UpdatedAt }
-        // }
-        const data = await res.json();
+    const data = await res.json();
+    const goToken: string | undefined = data?.token;
+    const expiresAtStr: string | undefined = data?.expiresAt;
+    const u = data?.user ?? {};
+    if (!goToken || !u) return null;
 
-        const goToken: string | undefined = data?.token;
-        const expiresAtStr: string | undefined = data?.expiresAt;
-        const u = data?.user ?? {};
-
-        if (!goToken || !u) return null;
-
-        const normalizedUser = {
-          id: String(u.ID),
-          email: String(u.Email),
-          name: String(u.Name),
-          role: u.Role ? String(u.Role) : "user",
-          image: u.Image ? String(u.Image) : null
-        };
-
-        const goTokenExpMs = expiresAtStr ? new Date(expiresAtStr).getTime() : undefined;
-
-        // Return fields we want to promote into the JWT on first sign-in
-        return {
-          ...normalizedUser,
-          goToken,
-          goTokenExp: goTokenExpMs
-        } as any;
-      }
-    })
+    return {
+      id: String(u.ID),
+      email: String(u.Email),
+      name: String(u.Name),
+      role: u.Role ? String(u.Role) : "user",
+      image: u.Image ? String(u.Image) : null,
+      goToken,
+      goTokenExp: expiresAtStr ? new Date(expiresAtStr).getTime() : undefined,
+    } as any;
+  },
+})
   ],
   callbacks: {
     async jwt({ token, user }) {

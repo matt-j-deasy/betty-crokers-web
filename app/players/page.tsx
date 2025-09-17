@@ -1,10 +1,11 @@
 import { apiGetJson } from "@/app/lib/api";
 import { Envelope, Player } from "@/app/lib/types";
+import Link from "next/link";
 
 export const metadata = { title: "Players — Betty Crockers" };
 
 async function fetchPlayers(): Promise<Player[]> {
-  const payload = await apiGetJson<Envelope<Player[]>>("/api/players").catch(() => ({
+  const payload = await apiGetJson<Envelope<Player[]>>("/players").catch(() => ({
     data: [],
     total: 0,
     page: 1,
@@ -19,13 +20,12 @@ export default async function PlayersPage() {
   return (
     <section className="space-y-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Players</h1>
-        <a
+        <Link
           href="/players/new"
           className="px-4 py-2 rounded-lg border bg-white hover:bg-neutral-50"
         >
           Add Player
-        </a>
+        </Link>
       </header>
 
       <div className="overflow-x-auto rounded-xl border bg-white">
