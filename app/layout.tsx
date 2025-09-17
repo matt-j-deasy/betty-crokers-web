@@ -21,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/teams">Teams</Link>
                 <Link href="/leagues">Leagues</Link>
                 <Link href="/seasons">Seasons</Link>
+                <Link href="/games">Games</Link>
                 <UserMenu />
               </nav>
             </div>

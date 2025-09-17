@@ -42,8 +42,6 @@ async function TeamList() {
     );
   }
 
-  console.log("teams", teams, players);
-
   return (
     <ul className="divide-y rounded-lg border bg-white">
       {teams.map((t) => {

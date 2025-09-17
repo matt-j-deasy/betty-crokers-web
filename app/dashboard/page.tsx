@@ -6,9 +6,8 @@ export default async function Dashboard() {
   const results = await Promise.allSettled<Count>([
   ]);
 
-  const [players, teams, matches] = results.map((r, idx) => {
+  const [players, teams, matches] = results.map((r) => {
     if (r.status === "fulfilled") return r.value.count;
-    console.error(`Dashboard count fetch failed [idx=${idx}]`, r.reason);
     return null;
   });
 

@@ -71,38 +71,39 @@ export type Player = {
   UpdatedAt?: string;
 };
 
-export type MatchType = "SINGLES" | "TEAMS";
-export type Side = "A" | "B";
+export interface Game {
+  ID: number;
+  SeasonID?: number | null;
+  MatchType: "players" | "teams";
+  TargetPoints?: number | null;
+  ScheduledAt?: string | null; // RFC3339
+  Timezone?: string | null;
+  Location?: string | null;
+  Description?: string | null;
+  Status?: "scheduled" | "in_progress" | "completed" | "canceled";
 
-export interface MatchParticipant {
-  id: ID;
-  matchId: ID;
-  playerId: ID;
-  side: Side;
+  CreatedAt: string;
+  UpdatedAt: string;
+  DeletedAt?: string | null;
 }
 
-export interface MatchRound {
-  id: ID;
-  matchId: ID;
-  number: number;
-  scoreA: number;
-  scoreB: number;
-  twentiesA: number;
-  twentiesB: number;
-}
+export type Side = {
+  ID: number;
+  GameID: number;
+  Side: "A" | "B";
+  TeamId?: number;
+  playerId?: number;
+  Points?: number;
+  Color?: "white" | "black" | "natural" | null;
+  CreatedAt: string;
+  UpdatedAt: string;
+  DeletedAt?: string | null;
+};
 
-export interface Match {
-  id: ID;
-  seasonId: ID;
-  type: MatchType;
-  playedAt: string;
-  teamAId?: ID | null;
-  teamBId?: ID | null;
-  participants: MatchParticipant[];
-  rounds: MatchRound[];
-  createdAt: string;
-  updatedAt: string;
-}
+export type GameWithSides = Game & {
+  Sides?: Side[];
+  WinnerSide?: "A" | "B" | null;
+};
 
 export type Envelope<T> = { data: T; total: number; page: number; size: number };
 
