@@ -102,10 +102,9 @@ export default function ScoreManager(p: Props) {
               onChange={(e) => setStatus(e.target.value as any)}
               className="w-full rounded border px-2 py-1"
             >
-              <option value="scheduled">Scheduled</option>
               <option value="in_progress">In Progress</option>
               <option value="canceled">Canceled</option>
-              {/* completed remains automatic (points ≥ target) */}
+                <option value="completed">Completed</option>
             </select>
           </div>
           <div className="space-y-1">

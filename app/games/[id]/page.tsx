@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { apiGetJson } from "@/app/lib/api";
 import { Envelope, GameWithSides, Season, Team, Player } from "@/app/lib/types";
 import ScoreManager from "./ui/ScoreManager";
+import GameActions from "./ui/GameActions";
 
 export const metadata = { title: "Game — Betty Crockers" };
 
@@ -58,7 +59,6 @@ export default async function GamePage(props: { params: Promise<{ id: string }> 
   const g = gws.game;
   const seasonName = g.SeasonID ? (seasonById.get(String(g.SeasonID))?.Name ?? `Season #${g.SeasonID}`) : "Exhibition";
 
-  // Build display names for sides now so the client form can render immediately
   const display = (side: "A" | "B") => {
     const s = gws.sides?.find((x) => x.Side === side);
     if (!s) return { label: "—", points: 0, color: "natural" as const };
@@ -74,48 +74,37 @@ export default async function GamePage(props: { params: Promise<{ id: string }> 
 
   return (
     <section className="space-y-6">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Game #{g.ID}</h1>
           <p className="text-sm text-neutral-600">
             {seasonName} • {g.MatchType.toUpperCase()} • Status: <span className="capitalize">{g.Status ?? "scheduled"}</span>
           </p>
         </div>
-        <Link href="/games" className="text-sm text-neutral-600 hover:underline">← Back to Games</Link>
+
+        <div className="flex items-center gap-3">
+          <GameActions gameId={g.ID} status={(g.Status as any) ?? "scheduled"} winningTeam={a.points < b.points ? "B" : "A"} />
+          <Link href="/games" className="text-sm text-neutral-600 hover:underline">← Back to Games</Link>
+        </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <div className="rounded-xl border bg-white p-4">
-            <ScoreManager
-              gameId={g.ID}
-              matchType={g.MatchType}
-              targetPoints={g.TargetPoints ?? 100}
-              status={g.Status ?? "scheduled"}
-              winnerSide={g.WinnerSide ?? null}
-              sides={gws.sides ?? []}
-              sideALabel={a.label}
-              sideBLabel={b.label}
-              sideAPoints={a.points}
-              sideBPoints={b.points}
-              sideAColor={a.color}
-              sideBColor={b.color}
-              location={g.Location ?? ""}
-              description={g.Description ?? ""}
-            />
-          </div>
-        </div>
-
-        <aside className="lg:col-span-1 space-y-3">
-          <div className="rounded-xl border bg-white p-4">
-            <h2 className="mb-2 text-lg font-semibold">Details</h2>
-            <dl className="text-sm space-y-1">
-              <div className="flex justify-between"><dt>Target</dt><dd>{g.TargetPoints ?? 100}</dd></div>
-              <div className="flex justify-between"><dt>Location</dt><dd>{g.Location ?? "—"}</dd></div>
-              <div className="flex justify-between"><dt>Description</dt><dd>{g.Description ?? "—"}</dd></div>
-            </dl>
-          </div>
-        </aside>
+      <div className="rounded-xl border bg-white p-4">
+        <ScoreManager
+          gameId={g.ID}
+          matchType={g.MatchType}
+          targetPoints={g.TargetPoints ?? 100}
+          status={g.Status ?? "scheduled"}
+          winnerSide={g.WinnerSide ?? null}
+          sides={gws.sides ?? []}
+          sideALabel={a.label}
+          sideBLabel={b.label}
+          sideAPoints={a.points}
+          sideBPoints={b.points}
+          sideAColor={a.color}
+          sideBColor={b.color}
+          location={g.Location ?? ""}
+          description={g.Description ?? ""}
+        />
       </div>
     </section>
   );

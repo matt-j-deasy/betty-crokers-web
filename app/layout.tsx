@@ -16,7 +16,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/" className="font-semibold">Betty Crockers</Link>
               <nav className="flex items-center gap-4 text-sm">
                 <Link href="/dashboard">Dashboard</Link>
-                <Link href="/matches/new">Score</Link>
                 <Link href="/players">Players</Link>
                 <Link href="/teams">Teams</Link>
                 <Link href="/leagues">Leagues</Link>
