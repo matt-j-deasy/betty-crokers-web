@@ -56,51 +56,57 @@ export const authOptions: NextAuthOptions = {
   },
 })
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      // On initial sign-in, copy from "user" (what authorize returned)
-      if (user) {
-        token.uid = (user as any).id;
-        token.email = (user as any).email;
-        token.name = (user as any).name;
-        token.role = (user as any).role;
-        token.image = (user as any).image;
+callbacks: {
+  async jwt({ token, user }) {
+    // Initial sign-in
+    if (user) {
+      token.uid = (user as any).id;
+      token.email = (user as any).email;
+      token.name = (user as any).name;
+      token.role = (user as any).role;
+      token.image = (user as any).image;
 
-        token.goToken = (user as any).goToken;
-        token.goTokenExp = (user as any).goTokenExp;
-      }
-
-      // enforce expiration from your Go token
-      if (token.goTokenExp && Date.now() > Number(token.goTokenExp)) {
-        // Invalidate session if expired
-        return {
-          // keep minimal info; removing goToken essentially signs user out on next request
-          expired: true
-        } as any;
-      }
-
-      return token;
-    },
-    async session({ session, token }) {
-      // Attach normalized user fields
-      session.user = {
-        ...session.user,
-        id: token.uid as string,
-        email: token.email as string,
-        name: (token.name as string) ?? session.user?.name ?? null,
-        image: (token.image as string) ?? null,
-        // expose role to the UI
-        role: (token.role as string) ?? "user"
-      } as any;
-
-      // Attach access token + expiry for your fetchers/UI
-      (session as any).token = token.goToken as string | undefined;
-      (session as any).tokenExpiresAt = token.goTokenExp as number | undefined;
-      (session as any).expired = (token as any).expired === true;
-
-      return session;
+      token.goToken = (user as any).goToken;
+      token.goTokenExp = (user as any).goTokenExp;
+      token.expired = false; // clear any prior flag
     }
+
+    // If our upstream token expired, mark but keep token shape
+    if (token.goTokenExp && Date.now() > Number(token.goTokenExp)) {
+      token.goToken = undefined;
+      token.expired = true;
+    }
+
+    return token; // <- IMPORTANT: return the enriched token, not a new bare object
   },
-  pages: { signIn: "/login" },
+
+  async session({ session, token }) {
+    session.user = {
+      ...session.user,
+      id: token.uid as string,
+      email: token.email as string,
+      name: (token.name as string) ?? session.user?.name ?? null,
+      image: (token.image as string) ?? null,
+      role: (token.role as string) ?? "user",
+    } as any;
+
+    (session as any).token = token.goToken as string | undefined;
+    (session as any).tokenExpiresAt = token.goTokenExp as number | undefined;
+    (session as any).expired = (token as any).expired === true;
+
+    return session;
+  },
+
+  // Clamp redirect targets to same-origin / relative only
+  async redirect({ url, baseUrl }) {
+    if (url.startsWith("/")) return baseUrl + url; // relative OK
+    try {
+      const u = new URL(url);
+      if (u.origin === baseUrl) return url;       // same-origin OK
+    } catch {}
+    return baseUrl;                                // otherwise clamp
+  },
+},
+pages: { signIn: "/login" },
   events: {}
 };
