@@ -5,6 +5,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 type Color = "white" | "black" | "natural";
 type SaveState = "idle" | "saving" | "saved" | "error";
 
+const STEP = 5;
+function clampRound(n: number, max: number, step = STEP) {
+  const clamped = Math.max(0, Math.min(max, n));
+  return Math.round(clamped / step) * step;
+}
+
 export default function AutoSaveScore({
   gameId,
   side,                // "A" | "B"
@@ -24,15 +30,16 @@ export default function AutoSaveScore({
   disabled?: boolean;
   debounceMs?: number;
 }) {
-  const [value, setValue] = useState<number>(Math.max(0, Math.min(maxPoints, initialPoints)));
+  const [value, setValue] = useState<number>(() => clampRound(initialPoints, maxPoints));
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [popKey, setPopKey] = useState<number>(0); // re-mount to retrigger animation
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstRender = useRef(true);
 
-  // clamp if target changes
+  // Clamp & round if target changes
   useEffect(() => {
-    setValue((v) => Math.min(Math.max(0, v), maxPoints));
+    setValue((v) => clampRound(v, maxPoints));
   }, [maxPoints]);
 
   const colorClasses = useMemo(() => {
@@ -77,6 +84,9 @@ export default function AutoSaveScore({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, disabled, debounceMs]);
 
+  // Build tick marks every STEP (optional)
+  const tickCount = Math.floor(maxPoints / STEP);
+
   return (
     <div
       className={[
@@ -87,17 +97,9 @@ export default function AutoSaveScore({
       ].join(" ")}
       aria-live="polite"
     >
-      {/* Color strip on the edge */}
-      <div
-        className={[
-          "absolute top-0 bottom-0 w-1 rounded-l-xl left-0",
-          color === "white" ? "bg-white" : color === "black" ? "bg-neutral-900" : "bg-amber-600",
-        ].join(" ")}
-      />
-
       <div className="flex items-center justify-between">
         <div className="font-semibold">
-          Side {side} <span className="ml-2 text-sm opacity-80">{label}</span>
+          <span className="ml-2 text-sm opacity-80">{label}</span>
         </div>
         <StatusBadge state={saveState} error={error} />
       </div>
@@ -107,15 +109,22 @@ export default function AutoSaveScore({
           type="range"
           min={0}
           max={maxPoints}
-          step={1}
+          step={STEP}
           value={value}
-          onChange={(e) => setValue(Number(e.target.value))}
+          onChange={(e) => {
+            const raw = Number(e.target.value);
+            const next = clampRound(raw, maxPoints);
+            if (next !== value) setPopKey(Date.now()); // crisp “pop” on each step change
+            setValue(next);
+          }}
           disabled={disabled}
           className="w-full accent-current"
           aria-label={`Points for side ${side}`}
+          list={`ticks-${side}-${gameId}`}
         />
         <div className="w-16 text-center text-2xl font-bold tabular-nums">
-          {value}
+          {/* Remount on change to trigger snap animation */}
+          <span key={popKey} className="inline-block animate-snap">{value}</span>
         </div>
       </div>
 
@@ -124,11 +133,30 @@ export default function AutoSaveScore({
         <span>{maxPoints}</span>
       </div>
 
+      {/* Optional ticks (browser support varies) */}
+      <datalist id={`ticks-${side}-${gameId}`}>
+        {Array.from({ length: tickCount + 1 }, (_, i) => (
+          <option key={i} value={i * STEP} />
+        ))}
+      </datalist>
+
       {error && (
         <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
           {error}
         </div>
       )}
+
+      {/* Crisp “pop” animation for the number */}
+      <style jsx>{`
+        @keyframes snap {
+          0%   { transform: scale(0.92); filter: saturate(0.9); }
+          100% { transform: scale(1);    filter: saturate(1); }
+        }
+        .animate-snap {
+          animation: snap 120ms ease-out;
+          will-change: transform, filter;
+        }
+      `}</style>
     </div>
   );
 }

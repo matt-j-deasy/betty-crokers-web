@@ -126,7 +126,7 @@ export default function GameCreateForm() {
 
   return (
     <div className="rounded-xl border bg-white p-4">
-      <h2 className="mb-3 text-lg font-semibold">Create Game (Teams)</h2>
+      <h2 className="mb-3 text-lg font-semibold">Create Game</h2>
       <form onSubmit={onSubmit} className="space-y-3">
         {/* Season (optional) */}
         <div className="space-y-1">
@@ -138,12 +138,11 @@ export default function GameCreateForm() {
             className="w-full rounded-lg border px-3 py-2"
             disabled={loading}
           >
-            <option value="">Exhibition (no season)</option>
+            <option value="">Exhibition</option>
             {seasons.map((s) => (
               <option key={s.id} value={s.id}>{s.label}</option>
             ))}
           </select>
-          <p className="text-xs text-neutral-500">Leave as “Exhibition” to create a game without a season.</p>
         </div>
 
         {/* Teams */}

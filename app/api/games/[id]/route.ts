@@ -5,7 +5,8 @@ import { authOptions } from "@/app/lib/auth";
 
 const BASE = process.env.GO_SERVER_URL!;
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   const token = (session as any)?.token as string | undefined;
   if (!token || (session as any)?.expired) {

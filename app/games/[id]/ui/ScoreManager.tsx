@@ -123,7 +123,6 @@ export default function ScoreManager(p: Props) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full rounded border px-2 py-1"
-              placeholder="Week 3"
             />
           </div>
         </div>

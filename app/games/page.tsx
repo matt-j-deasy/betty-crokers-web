@@ -108,12 +108,6 @@ function renderTeamsCell(gws: GameWithSides, teamsById: Map<string, { ID: number
   );
 }
 
-function fmt(dt?: string | null) {
-  if (!dt) return "—";
-  const d = new Date(dt);
-  return isNaN(+d) ? "—" : d.toLocaleString();
-}
-
 async function GamesTable() {
   const [games, seasons] = await Promise.all([fetchGames(), fetchSeasons()]);
 
@@ -139,7 +133,6 @@ async function GamesTable() {
       <table className="w-full text-sm">
         <thead className="bg-neutral-100 text-left text-xs uppercase tracking-wider">
           <tr>
-            <th className="px-4 py-2">When</th>
             <th className="px-4 py-2">Season</th>
             <th className="px-4 py-2">Teams</th>
             <th className="px-4 py-2">Target</th>
@@ -152,7 +145,6 @@ async function GamesTable() {
             const g = gws.game;
             return (
               <tr key={g.ID} className="border-t hover:bg-neutral-50">
-                <td className="px-4 py-2">{fmt(g.ScheduledAt)}</td>
                 <td className="px-4 py-2">
                   {g.SeasonID
                     ? seasonById.get(String(g.SeasonID))?.Name ?? `Season #${g.SeasonID}`

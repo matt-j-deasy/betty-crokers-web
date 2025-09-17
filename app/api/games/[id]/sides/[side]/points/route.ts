@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
 const BASE = process.env.GO_SERVER_URL!;
-export async function PUT(req: NextRequest, { params }: { params: { id: string; side: "A"|"B" } }) {
+export async function PUT(
+  req: NextRequest,
+  props: { params: Promise<{ id: string; side: "A"|"B" }> }
+) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   const token = (session as any)?.token as string | undefined;
   if (!token || (session as any)?.expired) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
