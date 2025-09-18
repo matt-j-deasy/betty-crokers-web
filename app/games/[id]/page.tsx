@@ -1,3 +1,4 @@
+// app/games/[id]/page.tsx
 import { notFound } from "next/navigation";
 import { apiGetJson } from "@/app/lib/api";
 import { Envelope, GameWithSides, Season, Team, Player } from "@/app/lib/types";
@@ -5,7 +6,6 @@ import ScoreManager from "./ui/ScoreManager";
 import GameActions from "./ui/GameActions";
 
 export const metadata = { title: "Game — Crok America" };
-
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -43,8 +43,7 @@ function nameForPlayer(playerId?: number, playersById?: Map<string, Player>) {
   return canonical || p.Nickname || `Player #${playerId}`;
 }
 
-export default async function GamePage(props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export default async function GamePage({ params }: { params: { id: string } }) {
   const gws = await fetchGame(params.id);
   if (!gws) return notFound();
 
@@ -53,21 +52,31 @@ export default async function GamePage(props: { params: Promise<{ id: string }> 
     fetchTeams(),
     fetchPlayers(),
   ]);
+
   const seasonById = new Map(seasons.map((s) => [String(s.ID), s]));
   const teamsById = new Map(teams.map((t) => [String(t.ID), t]));
   const playersById = new Map(players.map((p) => [String(p.ID), p]));
 
   const g = gws.game;
-  const seasonName = g.SeasonID ? (seasonById.get(String(g.SeasonID))?.Name ?? `Season #${g.SeasonID}`) : "Exhibition";
+  const seasonName = g.SeasonID
+    ? (seasonById.get(String(g.SeasonID))?.Name ?? `Season #${g.SeasonID}`)
+    : "Exhibition";
 
   const display = (side: "A" | "B") => {
     const s = gws.sides?.find((x) => x.Side === side);
-
     if (!s) return { label: "—", points: 0, color: "natural" as const };
     if (g.MatchType === "teams") {
-      return { label: nameForTeam(s.TeamID, teamsById), points: s.Points ?? 0, color: s.Color ?? "natural" };
+      return {
+        label: nameForTeam(s.TeamID, teamsById),
+        points: s.Points ?? 0,
+        color: s.Color ?? "natural",
+      };
     } else {
-      return { label: nameForPlayer(s.PlayerID, playersById), points: s.Points ?? 0, color: s.Color ?? "natural" };
+      return {
+        label: nameForPlayer(s.PlayerID, playersById),
+        points: s.Points ?? 0,
+        color: s.Color ?? "natural",
+      };
     }
   };
 
@@ -80,12 +89,13 @@ export default async function GamePage(props: { params: Promise<{ id: string }> 
         <div>
           <h1 className="text-2xl font-bold">Game #{g.ID}</h1>
           <p className="text-sm text-neutral-600">
-            {seasonName} • {g.MatchType.toUpperCase()} • Status: <span className="capitalize">{g.Status ?? "scheduled"}</span>
+            {seasonName} • {g.MatchType.toUpperCase()} • Status:{" "}
+            <span className="capitalize">{g.Status ?? "scheduled"}</span>
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <GameActions gameId={g.ID} status={(g.Status as any) ?? "scheduled"} winningTeam={a.points < b.points ? "B" : "A"} />
+          <GameActions gameId={g.ID} status={(g.Status as any) ?? "scheduled"} />
         </div>
       </header>
 

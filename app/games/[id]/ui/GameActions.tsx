@@ -1,31 +1,41 @@
+// app/games/[id]/ui/GameActions.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import ActionButton from "./ActionButton";
 
 type Status = "scheduled" | "in_progress" | "completed" | "canceled";
+
+type Side = {
+  Side: "A" | "B";
+  Points?: number | null;
+};
 
 export default function GameActions({
   gameId,
   status,
-winningTeam,
 }: {
   gameId: number;
   status: Status | string; // tolerate unknowns
-    winningTeam?: "A" | "B" | null;
 }) {
   const router = useRouter();
-  const [isStarting, setIsStarting] = useState(false);
-  const [isCompleting, setIsCompleting] = useState(false);
+  const [pending, setPending] = useState<"start" | "complete" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const startDisabled = isStarting || isCompleting || status === "in_progress" || status === "completed" || status === "canceled";
-  const completeDisabled = isStarting || isCompleting || status === "completed" || status === "canceled";
+  const startDisabled =
+    !!pending ||
+    status === "in_progress" ||
+    status === "completed" ||
+    status === "canceled";
 
-  async function startGame() {
+  const completeDisabled =
+    !!pending || status === "completed" || status === "canceled";
+
+  const startGame = useCallback(async () => {
     try {
       setError(null);
-      setIsStarting(true);
+      setPending("start");
       const res = await fetch(`/api/games/${gameId}`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
@@ -36,55 +46,70 @@ winningTeam,
     } catch (e: any) {
       setError(e?.message ?? "Failed to start game");
     } finally {
-      setIsStarting(false);
+      setPending(null);
     }
+  }, [gameId, router]);
+
+  async function determineWinnerFromServer(): Promise<"A" | "B"> {
+    const res = await fetch(`/api/games/${gameId}/with-sides`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to load latest scores");
+    const data = await res.json();
+    const sides: Side[] = data?.sides ?? [];
+    const a = sides.find((s) => s.Side === "A")?.Points ?? 0;
+    const b = sides.find((s) => s.Side === "B")?.Points ?? 0;
+
+    if (a === b) {
+      // Choose your policy: block, ask user, or allow server tiebreak rules.
+      throw new Error("Scores are tied. Adjust scores before completing.");
+    }
+    return a > b ? "A" : "B";
   }
 
-  async function completeGame() {
+  const completeGame = useCallback(async () => {
     try {
       setError(null);
-      setIsCompleting(true);
+      setPending("complete");
+
+      // Option A (recommended): let the server decide if your API supports it.
+      // const res = await fetch(`/api/games/${gameId}/complete`, { method: "POST" });
+
+      // Option B: determine winner at action-time using latest persisted scores.
+      const winnerSide = await determineWinnerFromServer();
       const res = await fetch(`/api/games/${gameId}/complete`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ winnerSide: winningTeam }),
+        body: JSON.stringify({ winnerSide }),
       });
+
       if (!res.ok) throw new Error((await res.text()) || `Failed to complete (${res.status})`);
       router.refresh();
     } catch (e: any) {
       setError(e?.message ?? "Failed to complete game");
     } finally {
-      setIsCompleting(false);
+      setPending(null);
     }
-  }
+  }, [gameId, router]);
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        type="button"
+      <ActionButton
         onClick={startGame}
         disabled={startDisabled}
-        className={[
-          "rounded-lg px-3 py-2 text-sm font-medium transition",
-          startDisabled ? "bg-neutral-300 text-neutral-600 cursor-not-allowed" : "bg-blue-600 text-white hover:bg-blue-500",
-        ].join(" ")}
+        busy={pending === "start"}
         title="Set status to In Progress"
       >
-        {isStarting ? "Starting…" : "Start Game"}
-      </button>
+        Start Game
+      </ActionButton>
 
-      <button
-        type="button"
+      <ActionButton
         onClick={completeGame}
         disabled={completeDisabled}
-        className={[
-          "rounded-lg px-3 py-2 text-sm font-medium transition",
-          completeDisabled ? "bg-neutral-300 text-neutral-600 cursor-not-allowed" : "bg-green-600 text-white hover:bg-green-500",
-        ].join(" ")}
+        busy={pending === "complete"}
+        variant="success"
         title="Declare winner and complete"
       >
-        {isCompleting ? "Completing…" : "Complete Game"}
-      </button>
+        Complete Game
+      </ActionButton>
 
       {error && (
         <span className="ml-2 text-xs text-red-700" title={error}>

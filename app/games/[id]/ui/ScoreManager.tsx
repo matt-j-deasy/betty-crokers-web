@@ -1,3 +1,4 @@
+// app/games/[id]/ui/ScoreManager.tsx
 "use client";
 
 import AutoSaveScore from "./AutoSaveScore";
@@ -5,11 +6,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Side } from "@/app/lib/types";
 
+type Status = "scheduled" | "in_progress" | "completed" | "canceled";
+
 type Props = {
   gameId: number;
   matchType: "players" | "teams";
   targetPoints: number;
-  status: "scheduled" | "in_progress" | "completed" | "canceled";
+  status: Status;
   winnerSide: "A" | "B" | null;
   sides: Side[];
   sideALabel: string;
@@ -24,8 +27,8 @@ type Props = {
 
 export default function ScoreManager(p: Props) {
   const router = useRouter();
-  const [target ] = useState<number>(p.targetPoints);
-  const [status, setStatus] = useState<Props["status"]>(p.status);
+  const target = p.targetPoints; // constant for now
+  const [status, setStatus] = useState<Status>(p.status);
   const [location, setLocation] = useState(p.location);
   const [description, setDescription] = useState(p.description);
   const [busy, setBusy] = useState(false);
@@ -33,8 +36,9 @@ export default function ScoreManager(p: Props) {
 
   async function updateGame() {
     try {
-      setBusy(true); setError(null);
-      const body: any = {
+      setBusy(true);
+      setError(null);
+      const body = {
         targetPoints: target,
         status,
         location: location || null,
@@ -58,7 +62,7 @@ export default function ScoreManager(p: Props) {
 
   return (
     <div className="space-y-4">
-      {/* New: two autosave sliders */}
+      {/* Two autosave sliders */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <AutoSaveScore
           gameId={p.gameId}
@@ -80,31 +84,20 @@ export default function ScoreManager(p: Props) {
         />
       </div>
 
-      {/* Keep your settings editor below */}
+      {/* Settings */}
       <div className="rounded-lg border p-3 space-y-3">
         <h3 className="font-semibold">Game Settings</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* <div className="space-y-1">
-            <label className="text-sm">Target Points</label>
-            <input
-              type="number"
-              min={1}
-              value={target}
-              onChange={(e) => setTarget(Number(e.target.value))}
-              className="w-full rounded border px-2 py-1"
-            />
-            <p className="text-xs opacity-70">Sliders will clamp to this value.</p>
-          </div> */}
           <div className="space-y-1">
             <label className="text-sm">Status</label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
+              onChange={(e) => setStatus(e.target.value as Status)}
               className="w-full rounded border px-2 py-1"
             >
               <option value="in_progress">In Progress</option>
               <option value="canceled">Canceled</option>
-                <option value="completed">Completed</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
           <div className="space-y-1">
@@ -127,7 +120,9 @@ export default function ScoreManager(p: Props) {
         </div>
 
         {error && (
-          <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
+          <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </div>
         )}
 
         <div className="flex gap-2">
