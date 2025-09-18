@@ -28,13 +28,20 @@ export const authOptions: NextAuthOptions = {
 
     // Server-side call to API
     const url = `${apiBase()}/auth/login`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: creds.email, password: creds.password }),
-    });
-
+    let res: Response | undefined;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: creds.email, password: creds.password }),
+      });
+    } catch (e) {
+      console.error("[auth] fetch error", url, e);
+      return null;
+    }
     if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error("[auth] login failed", url, res.status, body.slice(0, 300));
       return null;
     }
 

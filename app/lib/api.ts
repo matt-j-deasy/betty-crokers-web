@@ -10,17 +10,9 @@ const isServer = () => typeof window === "undefined";
 
 // Pick base for current runtime
 function getApiBase() {
-  const base = isServer()
-    ? process.env.SERVER_API_BASE
-    : process.env.NEXT_PUBLIC_API_BASE;
-  if (!base) {
-    throw new Error(
-      `API base missing. Set ${
-        isServer() ? "SERVER_API_BASE" : "NEXT_PUBLIC_API_BASE"
-      }.`
-    );
-  }
-  return base.replace(/\/+$/, ""); // strip trailing slash
+  const base = isServer() ? process.env.SERVER_API_BASE : process.env.NEXT_PUBLIC_API_BASE;
+  if (!base?.startsWith("http")) throw new Error(`Bad API base: ${base}`);
+  return base.replace(/\/+$/, "");
 }
 
 // --- Auth header helpers (server vs client) ---

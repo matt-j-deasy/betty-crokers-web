@@ -58,7 +58,9 @@ export default async function PlayersPage() {
                   : "—";
                 return (
                   <tr key={p.ID} className="border-t hover:bg-neutral-50">
-                    <td className="px-4 py-2 font-medium">{p.Nickname}</td>
+                    <Link href={`/players/${p.ID}`}>
+                      <td className="px-4 py-2 font-medium">{p.Nickname}</td>
+                    </Link>
                     <td className="px-4 py-2">{name}</td>
                     {/* <td className="px-4 py-2">{p.teams?.length ?? 0}</td> */}
                     <td className="px-4 py-2">{joined}</td>
