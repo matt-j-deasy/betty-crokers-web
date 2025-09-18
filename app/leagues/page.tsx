@@ -4,6 +4,7 @@ import { authOptions } from "@/app/lib/auth";
 import LeagueCreateForm from "./ui/LeagueCreateForm";
 import { Envelope, League, SessionWithUser } from "../lib/types";
 import { apiGetJson } from "../lib/api";
+import Link from "next/link";
 
 export const metadata = { title: "Leagues — Crok America" };
 
@@ -30,7 +31,9 @@ async function LeagueList() {
     <ul className="divide-y rounded-lg border bg-white">
       {leagues.map((l) => (
         <li key={l.ID} className="flex items-center justify-between p-4">
-          <div className="font-medium">{l.Name}</div>
+          <Link href={`/leagues/${l.ID}`} className="font-medium">
+            <div className="font-medium">{l.Name}</div>
+          </Link>
         </li>
       ))}
     </ul>

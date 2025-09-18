@@ -4,6 +4,7 @@ import { authOptions } from "@/app/lib/auth";
 import TeamCreateForm from "./ui/TeamCreateForm";
 import { Envelope, SessionWithUser, Team, Player } from "../lib/types";
 import { apiGetJson } from "../lib/api";
+import TeamCard from "../components/TeamCard";
 
 export const metadata = { title: "Teams — Crok America" };
 
@@ -33,8 +34,7 @@ async function fetchPlayers(): Promise<Player[]> {
 }
 
 async function TeamList() {
-  const [teams, players] = await Promise.all([fetchTeams(), fetchPlayers()]);
-  const playerById = new Map(players.map((p) => [String(p.ID), p]));
+  const [teams] = await Promise.all([fetchTeams(), fetchPlayers()]);
 
   if (teams.length === 0) {
     return (
@@ -45,27 +45,11 @@ async function TeamList() {
   }
 
   return (
-    <ul className="divide-y rounded-lg border bg-white">
-      {teams.map((t) => {
-        const a = playerById.get(String(t.PlayerAID));
-        const b = playerById.get(String(t.PlayerBID));
-        return (
-          <li key={t.ID} className="flex items-center justify-between p-4">
-            <div className="flex flex-col">
-              <div className="font-medium">{t.Name}</div>
-              <div className="text-xs text-neutral-600">
-                {a ? `${a.FirstName} ${a.LastName}` : `Player #${t.PlayerAID}`} •{" "}
-                {b ? `${b.FirstName} ${b.LastName}` : `Player #${t.PlayerBID}`}
-              </div>
-              {t.Description && (
-                <div className="mt-1 text-xs text-neutral-500">{t.Description}</div>
-              )}
-            </div>
-            {/* Future: actions (edit/delete) */}
-          </li>
-        );
-      })}
-    </ul>
+    <div className="space-y-4">
+      {teams.map((t) => (
+        <TeamCard key={t.ID} teamId={t.ID} />
+      ))}
+    </div>
   );
 }
 
