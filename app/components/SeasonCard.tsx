@@ -29,17 +29,12 @@ async function Impl({ seasonId }: { seasonId: string | number }) {
     );
   }
 
-  const range = `${new Date(season.StartsOn).toLocaleDateString()} – ${new Date(
-    season.EndsOn
-  ).toLocaleDateString()}`;
-
   return (
     <Link
       href={`/seasons/${season.ID}`}
       className="block rounded-2xl border bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
     >
       <div className="font-semibold truncate">{season.Name ?? `Season #${season.ID}`}</div>
-      <div className="text-xs text-neutral-500 mt-1">{range} • {season.Timezone}</div>
     </Link>
   );
 }

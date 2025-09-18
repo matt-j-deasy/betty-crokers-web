@@ -2,14 +2,26 @@
 import Link from "next/link";
 import { apiGetJson } from "../lib/api";
 import { GameWithSides } from "../lib/types";
+import { JSX } from "react";
 
 async function fetchGame(id: number): Promise<GameWithSides | null> {
-  // Assuming GET /api/games/:id exists via your proxy
   const res = await apiGetJson<GameWithSides>(`/games/${id}/with-sides`).catch(() => null);
   return res ?? null;
 }
 
-export default async function GameCard({ gameId }: { gameId: number }) {
+function GameCardSkeleton() {
+  return (
+    <div className="rounded-2xl border bg-white p-4 shadow-sm animate-pulse">
+      <div className="space-y-2">
+        <div className="h-4 w-24 bg-neutral-200 rounded" />
+        <div className="h-3 w-40 bg-neutral-200 rounded" />
+        <div className="h-4 w-56 bg-neutral-200 rounded" />
+      </div>
+    </div>
+  );
+}
+
+async function Impl({ gameId }: { gameId: number }) {
   const gws = await fetchGame(gameId);
 
   if(!gws || !gws.game) {
@@ -58,16 +70,7 @@ export default async function GameCard({ gameId }: { gameId: number }) {
   );
 }
 
-export function GameCardSkeleton() {
-  return (
-    <div className="rounded-2xl border bg-white p-4 shadow-sm animate-pulse">
-      <div className="space-y-2">
-        <div className="h-4 w-24 bg-neutral-200 rounded" />
-        <div className="h-3 w-40 bg-neutral-200 rounded" />
-        <div className="h-4 w-56 bg-neutral-200 rounded" />
-      </div>
-    </div>
-  );
-}
-
-(GameCard as any).Skeleton = GameCardSkeleton;
+// typed static `Skeleton`
+type Comp = (p: { gameId: string | number }) => Promise<JSX.Element>;
+const GameCard = Object.assign(Impl as Comp, { Skeleton: GameCardSkeleton });
+export default GameCard;

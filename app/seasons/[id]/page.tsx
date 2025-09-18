@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { apiGetJson } from "@/app/lib/api";
 import { Season, Team } from "@/app/lib/types";
-import SeasonCard from "@/app/components/SeasonCard";
 import TeamCard from "@/app/components/TeamCard";
 
 export const metadata = { title: "League — Betty Crockers" };
@@ -21,7 +20,8 @@ async function fetchSeasonTeams(seasonId: string | number): Promise<Team[]> {
   return Array.isArray(res) ? res : res?.data ?? [];
 }
 
-export default async function SeasonPage({ params }: { params: { id: string } }) {
+export default async function SeasonPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const id = params.id;
   const [season, teams] = await Promise.all([fetchSeason(id), fetchSeasonTeams(id)]);
   if (!season) notFound();

@@ -8,7 +8,6 @@ const NAV_ITEMS = [
   { href: "/games", label: "Games" },
   { href: "/players", label: "Players" },
   { href: "/teams", label: "Teams" },
-  { href: "/seasons", label: "Seasons" },
   { href: "/leagues", label: "Leagues" },
 ];
 

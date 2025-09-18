@@ -21,7 +21,8 @@ async function fetchLeagueSeasons(leagueId: string | number): Promise<Season[]> 
   return Array.isArray(res) ? res : res?.data ?? [];
 }
 
-export default async function LeaguePage({ params }: { params: { id: string } }) {
+export default async function LeaguePage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const id = params.id;
   const [league, seasons] = await Promise.all([fetchLeague(id), fetchLeagueSeasons(id)]);
   if (!league) notFound();

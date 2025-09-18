@@ -5,6 +5,7 @@ import { apiGetJson } from "@/app/lib/api";
 import { Game, Team } from "@/app/lib/types";
 import PlayerCard from "@/app/components/PlayerCard";
 import GameCard from "@/app/components/GameCard";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic"; // or tune with revalidate
 
@@ -50,8 +51,8 @@ export default async function TeamPage(props: { params: Promise<Params> }) {
           <h2 className="text-lg font-semibold">Players</h2>
         </div>
         <div className="flex flex-wrap gap-4">
-            {team.PlayerAID && <PlayerCard playerId={team.PlayerAID} />}
-            {team.PlayerBID && <PlayerCard playerId={team.PlayerBID} />}
+            {team.PlayerAID && <Suspense fallback={<PlayerCard.Skeleton />}><PlayerCard playerId={team.PlayerAID} /></Suspense>}
+            {team.PlayerBID && <Suspense fallback={<PlayerCard.Skeleton />}><PlayerCard playerId={team.PlayerBID} /></Suspense>}
         </div>
       </section>
 
@@ -79,7 +80,9 @@ export default async function TeamPage(props: { params: Promise<Params> }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {games.map((g) => (
-                <GameCard gameId={g.ID} key={g.ID} />
+                <Suspense key={g.ID} fallback={<GameCard.Skeleton />}>
+                  <GameCard gameId={g.ID} />
+                </Suspense>
             ))}
           </div>
         )}

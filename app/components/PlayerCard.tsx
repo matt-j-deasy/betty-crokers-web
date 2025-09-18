@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Player } from "../lib/types";
 import { apiGetJson } from "../lib/api";
+import { JSX } from "react";
 
 async function fetchPlayer(id: number): Promise<Player | null> {
   // Assuming GET /api/players/:id exists via proxy below; otherwise swap to list+find.
@@ -9,7 +10,21 @@ async function fetchPlayer(id: number): Promise<Player | null> {
   return res ?? null;
 }
 
-export default async function PlayerCard({ playerId }: { playerId: number }) {
+function PlayerCardSkeleton() {
+  return (
+    <div className="rounded-2xl border bg-white p-4 shadow-sm animate-pulse">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-full bg-neutral-200" />
+        <div className="space-y-2 w-full">
+          <div className="h-4 w-40 bg-neutral-200 rounded" />
+          <div className="h-3 w-24 bg-neutral-200 rounded" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function Impl({ playerId }: { playerId: number }) {
   const player = await fetchPlayer(playerId);
 
   if (!player) {
@@ -38,19 +53,7 @@ export default async function PlayerCard({ playerId }: { playerId: number }) {
   );
 }
 
-// Optional: drop-in skeleton for Suspense fallbacks
-export function PlayerCardSkeleton() {
-  return (
-    <div className="rounded-2xl border bg-white p-4 shadow-sm animate-pulse">
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-neutral-200" />
-        <div className="space-y-2 w-full">
-          <div className="h-4 w-40 bg-neutral-200 rounded" />
-          <div className="h-3 w-24 bg-neutral-200 rounded" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-(PlayerCard as any).Skeleton = PlayerCardSkeleton;
+// typed static `Skeleton`
+type Comp = (p: { playerId: string | number }) => Promise<JSX.Element>;
+const PlayerCard = Object.assign(Impl as Comp, { Skeleton: PlayerCardSkeleton });
+export default PlayerCard;
