@@ -4,8 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      # args: # only if you need build-time public flags
-      #   NEXT_PUBLIC_SOME_FLAG: "true"
     image: your-org/league-ui:latest
     environment:
       PORT: "3000"
@@ -15,7 +13,7 @@ services:
       NEXTAUTH_TRUST_HOST: "true"
 
       # server-side (from inside the container)
-      SERVER_API_BASE: "http://host.docker.internal:8080/api/v1"  # or http://api:8080/api/v1 if same compose
+      SERVER_API_BASE: "http://host.docker.internal:8080/api/v1"
 
       # client-side (browser)
       NEXT_PUBLIC_API_BASE: "http://localhost:8080/api/v1"

@@ -1,4 +1,3 @@
-// NO "use client"
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { apiGetJson } from "@/app/lib/api";
@@ -8,23 +7,26 @@ import GameActions from "./ui/GameActions";
 
 export const metadata = { title: "Game — Betty Crockers" };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function fetchGame(id: string): Promise<GameWithSides | null> {
-  return apiGetJson<GameWithSides>(`/api/games/${id}/with-sides`).catch(() => null);
+  return apiGetJson<GameWithSides>(`/games/${id}/with-sides`).catch(() => null);
 }
 async function fetchSeasons(): Promise<Season[]> {
-  const p = await apiGetJson<Envelope<Season[]>>("/api/seasons").catch(() => ({
+  const p = await apiGetJson<Envelope<Season[]>>("/seasons").catch(() => ({
     data: [], total: 0, page: 1, size: 0,
   }));
   return p.data;
 }
 async function fetchTeams(): Promise<Team[]> {
-  const p = await apiGetJson<Envelope<Team[]>>("/api/teams?size=500").catch(() => ({
+  const p = await apiGetJson<Envelope<Team[]>>("/teams?size=500").catch(() => ({
     data: [], total: 0, page: 1, size: 0,
   }));
   return p.data;
 }
 async function fetchPlayers(): Promise<Player[]> {
-  const p = await apiGetJson<Envelope<Player[]>>("/api/players?size=1000").catch(() => ({
+  const p = await apiGetJson<Envelope<Player[]>>("/players?size=1000").catch(() => ({
     data: [], total: 0, page: 1, size: 0,
   }));
   return p.data;
@@ -61,6 +63,8 @@ export default async function GamePage(props: { params: Promise<{ id: string }> 
 
   const display = (side: "A" | "B") => {
     const s = gws.sides?.find((x) => x.Side === side);
+
+    console.log({ s });
     if (!s) return { label: "—", points: 0, color: "natural" as const };
     if (g.MatchType === "teams") {
       return { label: nameForTeam(s.TeamID, teamsById), points: s.Points ?? 0, color: s.Color ?? "natural" };

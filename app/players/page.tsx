@@ -4,6 +4,9 @@ import Link from "next/link";
 
 export const metadata = { title: "Players — Betty Crockers" };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function fetchPlayers(): Promise<Player[]> {
   const payload = await apiGetJson<Envelope<Player[]>>("/players").catch(() => ({
     data: [],

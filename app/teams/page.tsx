@@ -7,8 +7,11 @@ import { apiGetJson } from "../lib/api";
 
 export const metadata = { title: "Teams — Betty Crockers" };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function fetchTeams(): Promise<Team[]> {
-  const payload = await apiGetJson<Envelope<Team[]>>("/api/teams").catch(() => ({
+  const payload = await apiGetJson<Envelope<Team[]>>("/teams").catch(() => ({
     data: [],
     total: 0,
     page: 1,

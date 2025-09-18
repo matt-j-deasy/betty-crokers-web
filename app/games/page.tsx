@@ -100,7 +100,7 @@ function renderTeamsCell(gws: GameWithSides, teamsById: Map<string, { ID: number
         {bName}
         <span className="ml-1 text-xs opacity-70">({bPts})</span>
         {bWon && (
-          <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-800">Loser</span>
+          <span className="ml-2 rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800">Winner</span>
         )}
       </span>
     </div>
