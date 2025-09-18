@@ -2,8 +2,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { apiGetJson } from "@/app/lib/api";
-import { Season, Team } from "@/app/lib/types";
+import { Game, Season, Team } from "@/app/lib/types";
 import TeamCard from "@/app/components/TeamCard";
+import GameCard from "@/app/components/GameCard";
 
 export const metadata = { title: "League — Betty Crockers" };
 
@@ -20,10 +21,18 @@ async function fetchSeasonTeams(seasonId: string | number): Promise<Team[]> {
   return Array.isArray(res) ? res : res?.data ?? [];
 }
 
+async function fetchRecentGames(id: string | number): Promise<Game[]> {
+  // Assumes: GET /games?seasonId=X&limit=25 -> Game[] or { data: Game[] }
+  const res = await apiGetJson<Game[] | { data: Game[] }>(`/games?seasonId=${id}&limit=25`).catch(
+    () => ({ data: [] as Game[] })
+  );
+  return Array.isArray(res) ? res : res?.data ?? [];
+}
+
 export default async function SeasonPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = params.id;
-  const [season, teams] = await Promise.all([fetchSeason(id), fetchSeasonTeams(id)]);
+  const [season, teams, games] = await Promise.all([fetchSeason(id), fetchSeasonTeams(id), fetchRecentGames(id)]);
   if (!season) notFound();
 
   return (
@@ -52,6 +61,27 @@ export default async function SeasonPage(props: { params: Promise<{ id: string }
             {teams.map((s) => (
               <Suspense key={s.ID} fallback={<TeamCard.Skeleton />}>
                 <TeamCard teamId={s.ID} />
+              </Suspense>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Recent Games */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Recent Games</h2>
+        </div>
+
+        {games.length === 0 ? (
+          <div className="rounded-xl border bg-white p-4 text-sm text-neutral-600">
+            No games recorded yet.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {games.map((g) => (
+              <Suspense key={g.ID} fallback={<GameCard.Skeleton />}>
+                <GameCard gameId={g.ID} />
               </Suspense>
             ))}
           </div>
