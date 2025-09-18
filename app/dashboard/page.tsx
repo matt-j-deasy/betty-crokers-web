@@ -17,7 +17,7 @@ export default async function Dashboard() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-bold">League Dashboard</h1>
+      <h1 className="text-2xl font-bold">Dashboard</h1>
 
       {anyFailed && (
         <div className="rounded-xl border border-yellow-300 bg-yellow-50 text-yellow-900 p-3 text-sm">

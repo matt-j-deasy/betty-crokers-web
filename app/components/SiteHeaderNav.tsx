@@ -5,11 +5,11 @@ import { useEffect, useRef, useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/games", label: "Games" },
   { href: "/players", label: "Players" },
   { href: "/teams", label: "Teams" },
-  { href: "/leagues", label: "Leagues" },
   { href: "/seasons", label: "Seasons" },
-  { href: "/games", label: "Games" },
+  { href: "/leagues", label: "Leagues" },
 ];
 
 export default function SiteHeader() {
@@ -101,39 +101,34 @@ export default function SiteHeader() {
 
           {/* Panel */}
           <div
-            ref={panelRef}
-            className="absolute inset-y-0 right-0 w-[80%] max-w-sm bg-white shadow-xl p-6 flex flex-col gap-6 translate-x-0 animate-[slideIn_.2s_ease]"
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">Menu</span>
-              <button
-                type="button"
-                aria-label="Close navigation menu"
-                className="rounded-lg p-2 hover:bg-black/5"
-                onClick={() => setOpen(false)}
-              >
-                <CloseIcon />
-              </button>
-            </div>
+  ref={panelRef}
+  className="absolute top-0 right-0 w-[80%] max-w-sm bg-white shadow-xl p-6 flex flex-col gap-6 animate-[slideIn_.2s_ease]"
+>
+  <div className="flex items-center justify-between">
+    <span className="font-semibold">Menu</span>
+    <button
+      type="button"
+      aria-label="Close navigation menu"
+      className="rounded-lg p-2 hover:bg-black/5"
+      onClick={() => setOpen(false)}
+    >
+      <CloseIcon />
+    </button>
+  </div>
 
-            <nav className="flex flex-col text-base">
-              {NAV_ITEMS.map((item, idx) => (
-                <Link
-                  key={item.href}
-                  ref={idx === 0 ? firstLinkRef : undefined}
-                  href={item.href}
-                  className="rounded-lg px-3 py-3 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-black/20"
-                  onClick={() => setOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              {/* Optional: user actions in mobile panel */}
-              <div className="mt-4 border-t pt-4">
-                {/* <UserMenu /> */}
-              </div>
-            </nav>
-          </div>
+  <nav className="flex flex-col text-base">
+    {NAV_ITEMS.map((item) => (
+      <Link
+        key={item.href}
+        href={item.href}
+        className="rounded-lg px-3 py-3 hover:bg-neutral-100"
+        onClick={() => setOpen(false)}
+      >
+        {item.label}
+      </Link>
+    ))}
+  </nav>
+</div>
         </div>
       )}
     </header>
