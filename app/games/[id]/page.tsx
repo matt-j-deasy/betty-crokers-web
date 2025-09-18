@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { apiGetJson } from "@/app/lib/api";
 import { Envelope, GameWithSides, Season, Team, Player } from "@/app/lib/types";
@@ -64,7 +63,6 @@ export default async function GamePage(props: { params: Promise<{ id: string }> 
   const display = (side: "A" | "B") => {
     const s = gws.sides?.find((x) => x.Side === side);
 
-    console.log({ s });
     if (!s) return { label: "—", points: 0, color: "natural" as const };
     if (g.MatchType === "teams") {
       return { label: nameForTeam(s.TeamID, teamsById), points: s.Points ?? 0, color: s.Color ?? "natural" };
@@ -88,7 +86,6 @@ export default async function GamePage(props: { params: Promise<{ id: string }> 
 
         <div className="flex items-center gap-3">
           <GameActions gameId={g.ID} status={(g.Status as any) ?? "scheduled"} winningTeam={a.points < b.points ? "B" : "A"} />
-          <Link href="/games" className="text-sm text-neutral-600 hover:underline">← Back to Games</Link>
         </div>
       </header>
 

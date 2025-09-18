@@ -24,7 +24,7 @@ type Props = {
 
 export default function ScoreManager(p: Props) {
   const router = useRouter();
-  const [target, setTarget] = useState<number>(p.targetPoints);
+  const [target ] = useState<number>(p.targetPoints);
   const [status, setStatus] = useState<Props["status"]>(p.status);
   const [location, setLocation] = useState(p.location);
   const [description, setDescription] = useState(p.description);
@@ -84,7 +84,7 @@ export default function ScoreManager(p: Props) {
       <div className="rounded-lg border p-3 space-y-3">
         <h3 className="font-semibold">Game Settings</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="space-y-1">
+          {/* <div className="space-y-1">
             <label className="text-sm">Target Points</label>
             <input
               type="number"
@@ -94,7 +94,7 @@ export default function ScoreManager(p: Props) {
               className="w-full rounded border px-2 py-1"
             />
             <p className="text-xs opacity-70">Sliders will clamp to this value.</p>
-          </div>
+          </div> */}
           <div className="space-y-1">
             <label className="text-sm">Status</label>
             <select
@@ -113,7 +113,7 @@ export default function ScoreManager(p: Props) {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="w-full rounded border px-2 py-1"
-              placeholder="Main Hall"
+              placeholder="Vasen"
             />
           </div>
           <div className="space-y-1">

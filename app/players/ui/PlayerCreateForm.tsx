@@ -12,7 +12,7 @@ const PlayerInput = z.object({
 
 type PlayerInput = z.infer<typeof PlayerInput>;
 
-export default function AddPlayerForm() {
+export default function PlayerCreateForm() {
   const router = useRouter();
   const [values, setValues] = useState<PlayerInput>({
     nickname: "",
@@ -73,6 +73,8 @@ export default function AddPlayerForm() {
   }
 
   return (
+     <div className="rounded-xl border bg-white p-4">
+      <h2 className="mb-3 text-lg font-semibold">Add Player</h2>
     <form onSubmit={onSubmit} className="space-y-4 max-w-md">
       {serverError && (
         <div className="rounded-lg border border-red-300 bg-red-50 p-2 text-sm text-red-900">
@@ -139,5 +141,6 @@ export default function AddPlayerForm() {
         </button>
       </div>
     </form>
+  </div>
   );
 }

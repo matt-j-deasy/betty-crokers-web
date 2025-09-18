@@ -1,5 +1,4 @@
 // app/teams/[id]/page.tsx
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { apiGetJson } from "@/app/lib/api";
 import { Game, Team } from "@/app/lib/types";
@@ -17,7 +16,7 @@ async function fetchTeam(id: number): Promise<Team | null> {
 }
 
 async function fetchRecentGames(id: number): Promise<Game[]> {
-  const res = await apiGetJson<Game[] | { data: Game[] }>(`/teams/${id}/games?limit=5`).catch(
+  const res = await apiGetJson<Game[] | { data: Game[] }>(`/games?teamId=${id}&limit=25`).catch(
     () => ({ data: [] as Game[] })
   );
   return Array.isArray(res) ? res : res?.data ?? [];
@@ -68,9 +67,6 @@ export default async function TeamPage(props: { params: Promise<Params> }) {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Recent Games</h2>
-          <Link className="text-sm text-blue-600 hover:underline" href={`/teams/${teamId}/games`}>
-            See all games
-          </Link>
         </div>
 
         {games.length === 0 ? (

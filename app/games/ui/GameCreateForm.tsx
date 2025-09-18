@@ -14,7 +14,7 @@ export default function GameCreateForm() {
   const [teamBId, setTeamBId] = useState<string>("");
   const [colorA, setColorA] = useState<"white" | "black" | "natural">("white");
   const [colorB, setColorB] = useState<"white" | "black" | "natural">("black");
-  const [targetPoints, setTargetPoints] = useState<number | "">("");
+  // const [targetPoints, setTargetPoints] = useState<number | "">("");
   const [scheduledAtLocal, setScheduledAtLocal] = useState<string>(""); // HTML datetime-local
 //   const [timezone, setTimezone] = useState<string>("America/New_York");
   const [location, setLocation] = useState<string>("");
@@ -89,7 +89,7 @@ export default function GameCreateForm() {
     };
 
     if (seasonId) body.seasonId = Number(seasonId);          // omit => exhibition
-    if (targetPoints !== "" && Number(targetPoints) > 0) body.targetPoints = Number(targetPoints);
+    // if (targetPoints !== "" && Number(targetPoints) > 0) body.targetPoints = Number(targetPoints);
     const scheduledIso = toRFC3339(scheduledAtLocal);
     if (scheduledIso) body.scheduledAt = scheduledIso;
     // if (timezone) body.timezone = timezone;
@@ -112,7 +112,7 @@ export default function GameCreateForm() {
       setTeamBId("");
       setColorA("white");
       setColorB("black");
-      setTargetPoints("");
+      // setTargetPoints("");
       setScheduledAtLocal("");
       setLocation("");
       setDescription("");
@@ -191,9 +191,9 @@ export default function GameCreateForm() {
               onChange={(e) => setColorA(e.target.value as any)}
               className="w-full rounded-lg border px-3 py-2"
             >
-              <option value="white">White</option>
               <option value="black">Black</option>
               <option value="natural">Natural</option>
+              <option value="white">White</option>
             </select>
           </div>
           <div className="space-y-1">
@@ -205,8 +205,8 @@ export default function GameCreateForm() {
               className="w-full rounded-lg border px-3 py-2"
             >
               <option value="white">White</option>
-              <option value="black">Black</option>
               <option value="natural">Natural</option>
+              <option value="black">Black</option>
             </select>
           </div>
         </div>
@@ -236,7 +236,7 @@ export default function GameCreateForm() {
         </div> */}
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <div className="space-y-1">
+          {/* <div className="space-y-1">
             <label htmlFor="target" className="text-sm font-medium">Target Points</label>
             <input
               id="target"
@@ -247,7 +247,7 @@ export default function GameCreateForm() {
               className="w-full rounded-lg border px-3 py-2"
               placeholder="100 (default)"
             />
-          </div>
+          </div> */}
           <div className="space-y-1">
             <label htmlFor="location" className="text-sm font-medium">Location</label>
             <input

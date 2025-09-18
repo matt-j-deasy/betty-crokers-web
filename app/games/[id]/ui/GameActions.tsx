@@ -44,7 +44,6 @@ winningTeam,
     try {
       setError(null);
       setIsCompleting(true);
-      console.log({ winningTeam });
       const res = await fetch(`/api/games/${gameId}/complete`, {
         method: "POST",
         headers: { "content-type": "application/json" },

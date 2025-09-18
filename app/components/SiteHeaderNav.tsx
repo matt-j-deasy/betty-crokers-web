@@ -2,13 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import UserMenu from "./UserMenu";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard" },
   { href: "/games", label: "Games" },
   { href: "/players", label: "Players" },
   { href: "/teams", label: "Teams" },
   { href: "/leagues", label: "Leagues" },
+];
+
+const MOBILE_NAV_ITEMS = [
+  ...NAV_ITEMS,
+  { href: "/profile", label: "Profile" },
+  { href: "/logout", label: "Log out" },
 ];
 
 export default function SiteHeader() {
@@ -70,7 +76,7 @@ export default function SiteHeader() {
           {/* Keep your existing user menu on desktop */}
           <span className="inline-flex">
             {/* This stays as-is from your project */}
-            {/* <UserMenu /> */}
+            <UserMenu />
           </span>
         </nav>
 
@@ -116,7 +122,7 @@ export default function SiteHeader() {
   </div>
 
   <nav className="flex flex-col text-base">
-    {NAV_ITEMS.map((item) => (
+    {MOBILE_NAV_ITEMS.map((item) => (
       <Link
         key={item.href}
         href={item.href}
