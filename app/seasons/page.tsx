@@ -6,7 +6,7 @@ import { Envelope, League, Season, SessionWithUser } from "../lib/types";
 import { apiGetJson } from "../lib/api";
 import Link from "next/link";
 
-export const metadata = { title: "Seasons — Betty Crockers" };
+export const metadata = { title: "Seasons — Crok America" };
 
 async function fetchSeasons(): Promise<Season[]> {
   const payload = await apiGetJson<Envelope<Season[]>>("/seasons").catch(() => ({

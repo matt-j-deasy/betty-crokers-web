@@ -2,7 +2,7 @@
 import Link from "next/link";
 import AddPlayerForm from "./AddPlayerForm";
 
-export const metadata = { title: "Add Player — Betty Crockers" };
+export const metadata = { title: "Add Player — Crok America" };
 
 export default function NewPlayerPage() {
   return (

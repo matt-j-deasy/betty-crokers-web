@@ -5,7 +5,7 @@ import TeamCreateForm from "./ui/TeamCreateForm";
 import { Envelope, SessionWithUser, Team, Player } from "../lib/types";
 import { apiGetJson } from "../lib/api";
 
-export const metadata = { title: "Teams — Betty Crockers" };
+export const metadata = { title: "Teams — Crok America" };
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

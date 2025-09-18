@@ -5,7 +5,7 @@ import LeagueCreateForm from "./ui/LeagueCreateForm";
 import { Envelope, League, SessionWithUser } from "../lib/types";
 import { apiGetJson } from "../lib/api";
 
-export const metadata = { title: "Leagues — Betty Crockers" };
+export const metadata = { title: "Leagues — Crok America" };
 
 async function fetchLeagues(): Promise<League[]> {
   const payload = await apiGetJson<Envelope<League[]>>("/leagues").catch(() => ({

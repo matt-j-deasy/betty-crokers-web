@@ -1,7 +1,7 @@
 import RegisterForm from "../components/auth/RegisterForm";
 
 
-export const metadata = { title: "Create account — Betty Crockers" };
+export const metadata = { title: "Create account — Crok America" };
 
 export default function RegisterPage() {
   return (

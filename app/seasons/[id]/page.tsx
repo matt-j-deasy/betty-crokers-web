@@ -5,7 +5,7 @@ import { apiGetJson } from "@/app/lib/api";
 import { Envelope, Player, Season, Team } from "@/app/lib/types";
 import SeasonAddTeamForm from "./ui/SeasonAddTeamForm";
 
-export const metadata = { title: "Season — Betty Crockers" };
+export const metadata = { title: "Season — Crok America" };
 
 async function fetchSeason(id: string): Promise<Season | null> {
   // Assuming GET /api/seasons/:id exists via proxy below; otherwise swap to list+find.

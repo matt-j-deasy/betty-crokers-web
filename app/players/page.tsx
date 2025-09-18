@@ -2,7 +2,7 @@ import { apiGetJson } from "@/app/lib/api";
 import { Envelope, Player } from "@/app/lib/types";
 import Link from "next/link";
 
-export const metadata = { title: "Players — Betty Crockers" };
+export const metadata = { title: "Players — Crok America" };
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

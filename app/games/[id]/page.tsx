@@ -5,7 +5,7 @@ import { Envelope, GameWithSides, Season, Team, Player } from "@/app/lib/types";
 import ScoreManager from "./ui/ScoreManager";
 import GameActions from "./ui/GameActions";
 
-export const metadata = { title: "Game — Betty Crockers" };
+export const metadata = { title: "Game — Crok America" };
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

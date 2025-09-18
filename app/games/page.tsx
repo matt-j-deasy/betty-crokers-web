@@ -6,7 +6,7 @@ import { authOptions } from "../lib/auth";
 import { apiGetJson } from "../lib/api";
 import Link from "next/link";
 
-export const metadata = { title: "Games — Betty Crockers" };
+export const metadata = { title: "Games — Crok America" };
 
 async function fetchGames(): Promise<Game[]> {
   const payload = await apiGetJson<Envelope<Game[]>>("/games?size=25").catch(() => ({

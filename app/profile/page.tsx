@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/auth";
 
-export const metadata = { title: "Your Profile — Betty Crockers" };
+export const metadata = { title: "Your Profile — Crok America" };
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
