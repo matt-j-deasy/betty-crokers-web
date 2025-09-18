@@ -45,7 +45,7 @@ async function TeamList() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
       {teams.map((t) => (
         <TeamCard key={t.ID} teamId={t.ID} />
       ))}

@@ -22,7 +22,8 @@ async function fetchRecentGames(id: number): Promise<Game[]> {
   return Array.isArray(res) ? res : res?.data ?? [];
 }
 
-export default async function TeamPage({ params }: { params: Params }) {
+export default async function TeamPage(props: { params: Promise<Params> }) {
+  const params = await props.params;
   const teamId = Number(params.id);
   if (Number.isNaN(teamId)) notFound();
 
@@ -39,7 +40,7 @@ export default async function TeamPage({ params }: { params: Params }) {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{team.Name ?? `Team #${team.ID}`}</h1>
-          <p className="text-sm text-neutral-500">Team ID: {team.ID}</p>
+          {/* <p className="text-sm text-neutral-500">Team ID: {team.ID}</p> */}
         </div>
       </header>
 

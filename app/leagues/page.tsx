@@ -4,7 +4,7 @@ import { authOptions } from "@/app/lib/auth";
 import LeagueCreateForm from "./ui/LeagueCreateForm";
 import { Envelope, League, SessionWithUser } from "../lib/types";
 import { apiGetJson } from "../lib/api";
-import Link from "next/link";
+import LeagueCard from "../components/LeagueCard";
 
 export const metadata = { title: "Leagues — Crok America" };
 
@@ -28,15 +28,13 @@ async function LeagueList() {
     );
   }
   return (
-    <ul className="divide-y rounded-lg border bg-white">
-      {leagues.map((l) => (
-        <li key={l.ID} className="flex items-center justify-between p-4">
-          <Link href={`/leagues/${l.ID}`} className="font-medium">
-            <div className="font-medium">{l.Name}</div>
-          </Link>
-        </li>
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      {leagues.map((league) => (
+        <Suspense key={league.ID} fallback={<LeagueCard.Skeleton />}>
+          <LeagueCard leagueId={league.ID} />
+        </Suspense>
       ))}
-    </ul>
+    </div>
   );
 }
 
