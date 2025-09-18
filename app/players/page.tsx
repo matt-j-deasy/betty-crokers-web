@@ -37,8 +37,6 @@ export default async function PlayersPage() {
             <tr>
               <th className="px-4 py-2">Nickname</th>
               <th className="px-4 py-2">Name</th>
-              {/* Room for multi-team membership display later */}
-              {/* <th className="px-4 py-2">Teams (this season)</th> */}
               <th className="px-4 py-2">Joined</th>
             </tr>
           </thead>
@@ -58,9 +56,9 @@ export default async function PlayersPage() {
                   : "—";
                 return (
                   <tr key={p.ID} className="border-t hover:bg-neutral-50">
-                    <Link href={`/players/${p.ID}`}>
-                      <td className="px-4 py-2 font-medium">{p.Nickname}</td>
-                    </Link>
+                      <td className="px-4 py-2 font-medium">
+                        <Link href={`/players/${p.ID}`}>{p.Nickname} </Link>
+                      </td>
                     <td className="px-4 py-2">{name}</td>
                     {/* <td className="px-4 py-2">{p.teams?.length ?? 0}</td> */}
                     <td className="px-4 py-2">{joined}</td>

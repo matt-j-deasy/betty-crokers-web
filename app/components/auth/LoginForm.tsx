@@ -3,6 +3,7 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useState, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginForm() {
   const { data: session, status } = useSession();
@@ -20,7 +21,7 @@ export default function LoginForm() {
       email,
       password,
       redirect: true,
-      callbackUrl: "/dashboard"
+      callbackUrl: "/"
     });
     // If redirect is true and success, the page will navigate away.
     setSubmitting(false);
@@ -33,9 +34,9 @@ export default function LoginForm() {
           Signed in as <strong>{session.user?.email}</strong>
         </div>
         <div className="flex gap-2">
-          <a href="/dashboard" className="flex-1 text-center rounded-xl px-4 py-2 border">
-            Enter Dashboard
-          </a>
+          <Link href="/" className="flex-1 text-center rounded-xl px-4 py-2 border">
+            Enter Site
+          </Link>
           <button className="rounded-xl px-4 py-2 border" onClick={() => signOut()}>
             Sign out
           </button>

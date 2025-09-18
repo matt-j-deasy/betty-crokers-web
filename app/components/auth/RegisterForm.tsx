@@ -48,7 +48,7 @@ export default function RegisterForm() {
         email,
         password,
         redirect: true,
-        callbackUrl: "/dashboard"
+        callbackUrl: "/"
       });
     } catch (err: any) {
       setError(err?.message || "Registration failed.");

@@ -36,7 +36,7 @@ export function middleware(req: NextRequest) {
 
   // If logged in and visiting /login, send to app home
   if (hasSession && pathname === "/login") {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   // If not logged in and path is protected => send to /login with relative callback
