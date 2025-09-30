@@ -22,12 +22,15 @@ export default function UserMenu() {
       >
         {user?.image ? (
           <Image
-            src={user.image}
+            src={user?.image || "/avatar-default.png"}
             alt="avatar"
             className="w-full h-full object-cover"
             width={32}
             height={32}
             unoptimized
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "/avatar-default.png";
+            }}
           />
         ) : (
           <div className="w-full h-full bg-gray-300 flex items-center justify-center text-xs">
