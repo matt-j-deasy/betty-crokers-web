@@ -51,17 +51,17 @@ export default async function LeaguesPage() {
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Suspense fallback={<div className="text-sm text-neutral-500">Loading leagues…</div>}>
-            <LeagueList />
-          </Suspense>
-        </div>
-
         {isAdmin && (
           <div className="lg:col-span-1">
             <LeagueCreateForm />
           </div>
         )}
+        
+        <div className="lg:col-span-2">
+          <Suspense fallback={<div className="text-sm text-neutral-500">Loading leagues…</div>}>
+            <LeagueList />
+          </Suspense>
+        </div>
       </div>
     </section>
   );

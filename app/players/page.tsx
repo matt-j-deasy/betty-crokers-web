@@ -52,17 +52,17 @@ export default async function PlayersPage() {
         </header>
   
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <Suspense fallback={<div className="text-sm text-neutral-500">Loading players…</div>}>
-              <PlayersList />
-            </Suspense>
-          </div>
-  
           {isAdmin && (
             <div className="lg:col-span-1">
               <PlayerCreateForm />
             </div>
           )}
+          
+          <div className="lg:col-span-2">
+            <Suspense fallback={<div className="text-sm text-neutral-500">Loading players…</div>}>
+              <PlayersList />
+            </Suspense>
+          </div>
         </div>
       </section>
     );
