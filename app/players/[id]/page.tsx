@@ -18,7 +18,7 @@ async function fetchPlayer(id: number): Promise<Player | null> {
 async function fetchPlayerTeams(id: number): Promise<Team[]> {
   // Prefer a dedicated endpoint if present; fallback to query param.
   // Assumes: GET /players/:id/teams -> Team[] or { data: Team[] }
-  const res = await apiGetJson<Team[] | { data: Team[] }>(`/players/${id}/teams`).catch(
+  const res = await apiGetJson<Team[] | { data: Team[] }>(`/teams?playerID=${id}`).catch(
     () => ({ data: [] as Team[] })
   );
   return Array.isArray(res) ? res : res?.data ?? [];
