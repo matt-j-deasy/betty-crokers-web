@@ -43,7 +43,9 @@ function nameForPlayer(playerId?: number, playersById?: Map<string, Player>) {
   return canonical || p.Nickname || `Player #${playerId}`;
 }
 
-export default async function GamePage({ params }: { params: { id: string } }) {
+export default async function GamePage(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params;
+  const params = { id };
   const gws = await fetchGame(params.id);
   if (!gws) return notFound();
 

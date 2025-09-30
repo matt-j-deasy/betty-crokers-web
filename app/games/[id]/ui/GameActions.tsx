@@ -88,6 +88,7 @@ export default function GameActions({
     } finally {
       setPending(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId, router]);
 
   return (
