@@ -193,7 +193,6 @@ export default function GameCreateForm() {
             >
               <option value="black">Black</option>
               <option value="natural">Natural</option>
-              <option value="white">White</option>
             </select>
           </div>
           <div className="space-y-1">
@@ -204,7 +203,6 @@ export default function GameCreateForm() {
               onChange={(e) => setColorB(e.target.value as any)}
               className="w-full rounded-lg border px-3 py-2"
             >
-              <option value="white">White</option>
               <option value="natural">Natural</option>
               <option value="black">Black</option>
             </select>
