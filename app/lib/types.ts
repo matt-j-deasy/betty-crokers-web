@@ -118,3 +118,16 @@ export type SessionUserWithRole = {
   image?: string | null;
   role?: string | null;
 };
+
+export interface SeasonStanding {
+  teamId: number;
+  teamName: string;
+  games: number;
+  wins: number;
+  losses: number;
+  ties: number;
+  pointsFor: number;
+  pointsAgainst: number;
+  pointDiff: number;
+  winPct: number; // 0..1
+}

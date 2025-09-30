@@ -5,6 +5,7 @@ import { apiGetJson } from "@/app/lib/api";
 import { Game, Season, Team } from "@/app/lib/types";
 import TeamCard from "@/app/components/TeamCard";
 import GameCard from "@/app/components/GameCard";
+import SeasonStandingsTable from "@/app/components/SeasonStandingsTable";
 
 export const metadata = { title: "League — Betty Crockers" };
 
@@ -43,6 +44,17 @@ export default async function SeasonPage(props: { params: Promise<{ id: string }
           {/* <p className="text-sm text-neutral-500">League ID: {season.ID}</p> */}
         </div>
       </header>
+
+      {/* Standings */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Standings</h2>
+        </div>
+        <Suspense fallback={<SeasonStandingsTable.Skeleton />}>
+          {/* Server component fetches its own data */}
+          <SeasonStandingsTable seasonId={id} />
+        </Suspense>
+      </section>
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
