@@ -1,10 +1,13 @@
-// app/teams/[id]/page.tsx
 import { notFound } from "next/navigation";
 import { apiGetJson } from "@/app/lib/api";
-import { Game, Team } from "@/app/lib/types";
+import { Game, Team, SessionWithUser, Season } from "@/app/lib/types";
 import PlayerCard from "@/app/components/PlayerCard";
 import GameCard from "@/app/components/GameCard";
+import LinkTeamToSeasonCard from "@/app/components/LinkTeamToSeasonCard";
 import { Suspense } from "react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/lib/auth";
+import SeasonCard from "@/app/components/SeasonCard";
 
 export const dynamic = "force-dynamic"; // or tune with revalidate
 
@@ -22,17 +25,41 @@ async function fetchRecentGames(id: number): Promise<Game[]> {
   return Array.isArray(res) ? res : res?.data ?? [];
 }
 
+// Public: seasons for this team
+async function fetchTeamSeasons(teamId: number): Promise<Season[]> {
+  const res = await apiGetJson<Season[] | { data: Season[] }>(`/teams/${teamId}/seasons`).catch(
+    () => ({ data: [] as Season[] })
+  );
+  return Array.isArray(res) ? res : res?.data ?? [];
+}
+
+// Public: all seasons (for admin to choose from)
+async function fetchAllSeasons(): Promise<Season[]> {
+  const res = await apiGetJson<Season[] | { data: Season[] }>(`/seasons`).catch(
+    () => ({ data: [] as Season[] })
+  );
+  return Array.isArray(res) ? res : res?.data ?? [];
+}
+
 export default async function TeamPage(props: { params: Promise<Params> }) {
   const params = await props.params;
   const teamId = Number(params.id);
   if (Number.isNaN(teamId)) notFound();
 
-  const [team, games] = await Promise.all([
+  const session = (await getServerSession(authOptions)) as SessionWithUser | null;
+  const isAdmin = session?.user?.role === "admin";
+
+  const [team, games, teamSeasons, allSeasons] = await Promise.all([
     fetchTeam(teamId),
     fetchRecentGames(teamId),
+    fetchTeamSeasons(teamId),
+    isAdmin ? fetchAllSeasons() : Promise.resolve([] as Season[]),
   ]);
 
   if (!team) notFound();
+
+  // Build a quick lookup set for the admin form
+  const linkedSeasonIds = new Set(teamSeasons.map((s) => s.ID));
 
   return (
     <section className="mx-auto max-w-6xl space-y-8">
@@ -40,7 +67,6 @@ export default async function TeamPage(props: { params: Promise<Params> }) {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{team.Name ?? `Team #${team.ID}`}</h1>
-          {/* <p className="text-sm text-neutral-500">Team ID: {team.ID}</p> */}
         </div>
       </header>
 
@@ -50,9 +76,48 @@ export default async function TeamPage(props: { params: Promise<Params> }) {
           <h2 className="text-lg font-semibold">Players</h2>
         </div>
         <div className="flex flex-wrap gap-4">
-            {team.PlayerAID && <Suspense fallback={<PlayerCard.Skeleton />}><PlayerCard playerId={team.PlayerAID} /></Suspense>}
-            {team.PlayerBID && <Suspense fallback={<PlayerCard.Skeleton />}><PlayerCard playerId={team.PlayerBID} /></Suspense>}
+          {team.PlayerAID && (
+            <Suspense fallback={<PlayerCard.Skeleton />}>
+              <PlayerCard playerId={team.PlayerAID} />
+            </Suspense>
+          )}
+          {team.PlayerBID && (
+            <Suspense fallback={<PlayerCard.Skeleton />}>
+              <PlayerCard playerId={team.PlayerBID} />
+            </Suspense>
+          )}
         </div>
+      </section>
+
+      {/* Team Seasons */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Team Seasons</h2>
+        </div>
+
+        {teamSeasons.length === 0 ? (
+          <div className="rounded-xl border bg-white p-4 text-sm text-neutral-600">
+            Not linked to any seasons yet.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {teamSeasons.map((ts) => (
+              <Suspense key={ts.ID} fallback={<SeasonCard.Skeleton />}>
+                <SeasonCard seasonId={ts.ID} />
+              </Suspense>
+            ))}
+          </div>
+        )}
+
+        {isAdmin && (
+          <div className="pt-2">
+            <LinkTeamToSeasonCard
+              teamId={teamId}
+              allSeasons={allSeasons}
+              linkedSeasonIds={linkedSeasonIds}
+            />
+          </div>
+        )}
       </section>
 
       {/* Description */}
@@ -76,9 +141,9 @@ export default async function TeamPage(props: { params: Promise<Params> }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {games.map((g) => (
-                <Suspense key={g.ID} fallback={<GameCard.Skeleton />}>
-                  <GameCard gameId={g.ID} />
-                </Suspense>
+              <Suspense key={g.ID} fallback={<GameCard.Skeleton />}>
+                <GameCard gameId={g.ID} />
+              </Suspense>
             ))}
           </div>
         )}
