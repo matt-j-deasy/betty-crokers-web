@@ -131,3 +131,21 @@ export interface SeasonStanding {
   pointDiff: number;
   winPct: number; // 0..1
 }
+
+export interface PlayerSeasonStanding {
+  playerId: number;
+  games: number;
+  wins: number;
+  losses: number;
+  pointsFor: number;
+  pointsAgainst: number;
+  pointDiff: number;
+  winPct: number; // 0..1
+  rank?: number;  // optional in case API omits
+}
+
+export interface PlayerSeasonStandingsEnvelope {
+  next_cursor: string | null;
+  seasonId: number;
+  standings: PlayerSeasonStanding[];
+}
