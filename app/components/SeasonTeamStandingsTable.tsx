@@ -7,7 +7,6 @@ import SortableTH from "./SortableTH";
 async function fetchSeasonTeamStandings(
   seasonId: string | number
 ): Promise<SeasonStanding[]> {
-  console.log("Fetching season standings for season:", seasonId);
   const res = await apiGetJson<SeasonStanding[] | { data: SeasonStanding[] }>(
     `/seasons/${seasonId}/standings`
   ).catch(() => ({ data: [] as SeasonStanding[] }));

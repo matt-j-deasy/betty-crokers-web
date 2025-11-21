@@ -9,7 +9,6 @@ import { JSX } from "react";
 import SortableTH from "./SortableTH";
 
 async function fetchPlayerStats(seasonId: string | number) {
-  console.log("Fetching player stats for season:", seasonId);
   const res = await apiGetJson<
     PlayerSeasonStandingsEnvelope | { data: PlayerSeasonStandingsEnvelope }
   >(`/seasons/${seasonId}/standings/players`).catch(() => ({

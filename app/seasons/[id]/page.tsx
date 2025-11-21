@@ -4,8 +4,8 @@ import { apiGetJson } from "@/app/lib/api";
 import { Game, Season, Team } from "@/app/lib/types";
 import TeamCard from "@/app/components/TeamCard";
 import GameCard from "@/app/components/GameCard";
-import SeasonStandingsTable from "@/app/components/SeasonTeamStandingsTable";
-import SeasonPlayerStandingsTable from "@/app/components/SeasonPlayerStandingsTable";
+import SeasonTeamStatsTable from "@/app/components/SeasonTeamStatsTable";
+import SeasonPlayerStatsTable from "@/app/components/SeasonPlayerStatsTable";
 
 export const metadata = { title: "Season — Betty Crockers" };
 
@@ -28,11 +28,9 @@ async function fetchRecentGames(id: string | number): Promise<Game[]> {
   return Array.isArray(res) ? res : res?.data ?? [];
 }
 
-export default async function SeasonPage(props: { params: Promise<{ id: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+export default async function SeasonPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
   const id = params.id;
-
-  const searchParams = await props.searchParams;
 
   const [season, teams, games] = await Promise.all([
     fetchSeason(id),
@@ -41,13 +39,6 @@ export default async function SeasonPage(props: { params: Promise<{ id: string }
   ]);
 
   if (!season) notFound();
-
-  const sortKey = (searchParams.sort as string | undefined) ?? "rank";
-  const sortDir =
-    searchParams.dir === "asc" || searchParams.dir === "desc"
-      ? (searchParams.dir as "asc" | "desc")
-      : "desc";
-
   return (
     <section className="mx-auto max-w-6xl space-y-8">
       <header className="flex items-center justify-between">
@@ -58,31 +49,23 @@ export default async function SeasonPage(props: { params: Promise<{ id: string }
         </div>
       </header>
 
-      {/* Team Standings */}
+      {/* Team Stats */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Standings</h2>
+          <h2 className="text-lg font-semibold">Team Stats</h2>
         </div>
-        <Suspense fallback={<SeasonStandingsTable.Skeleton />}>
-          <SeasonStandingsTable
-            seasonId={id}
-            sortKey={sortKey as any}
-            sortDir={sortDir}
-          />
+        <Suspense fallback={<SeasonTeamStatsTable.Skeleton />}>
+          <SeasonTeamStatsTable seasonId={id} />
         </Suspense>
       </section>
 
-      {/* Player Standings */}
+      {/* Player Stats */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Player Standings</h2>
+          <h2 className="text-lg font-semibold">Player Stats</h2>
         </div>
-        <Suspense fallback={<SeasonPlayerStandingsTable.Skeleton />}>
-          <SeasonPlayerStandingsTable
-            seasonId={id}
-            sortKey={sortKey as any}
-            sortDir={sortDir}
-          />
+        <Suspense fallback={<SeasonPlayerStatsTable.Skeleton />}>
+          <SeasonPlayerStatsTable seasonId={id} />
         </Suspense>
       </section>
 
