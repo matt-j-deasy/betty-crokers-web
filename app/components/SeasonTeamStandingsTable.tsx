@@ -1,53 +1,36 @@
-import Link from "next/link";
 import { apiGetJson } from "@/app/lib/api";
-import {
-  Player,
-  PlayerSeasonStanding,
-  PlayerSeasonStandingsEnvelope,
-} from "@/app/lib/types";
+import { SeasonStanding, Team } from "@/app/lib/types";
+import Link from "next/link";
 import { JSX } from "react";
 import SortableTH from "./SortableTH";
 
-async function fetchPlayerStats(seasonId: string | number) {
-  console.log("Fetching player stats for season:", seasonId);
-  const res = await apiGetJson<
-    PlayerSeasonStandingsEnvelope | { data: PlayerSeasonStandingsEnvelope }
-  >(`/seasons/${seasonId}/standings/players`).catch(() => ({
-    data: {
-      seasonId: Number(seasonId),
-      standings: [] as PlayerSeasonStanding[],
-      next_cursor: null,
-    },
-  }));
+async function fetchSeasonTeamStandings(
+  seasonId: string | number
+): Promise<SeasonStanding[]> {
+  console.log("Fetching season standings for season:", seasonId);
+  const res = await apiGetJson<SeasonStanding[] | { data: SeasonStanding[] }>(
+    `/seasons/${seasonId}/standings`
+  ).catch(() => ({ data: [] as SeasonStanding[] }));
 
-  const env =
-    "standings" in (res as any)
-      ? (res as PlayerSeasonStandingsEnvelope)
-      : ((res as any)?.data as PlayerSeasonStandingsEnvelope);
-
-  return (
-    env ?? {
-      seasonId: Number(seasonId),
-      standings: [] as PlayerSeasonStanding[],
-      next_cursor: null,
-    }
-  );
+  return Array.isArray(res) ? res : res?.data ?? [];
 }
 
-async function PlayerName({ id }: { id: number }) {
-  const p = await apiGetJson<Player | null>(`/players/${id}`).catch(() => null);
-  if (!p) return <span>Player #{id}</span>;
+/** Small server helper to render a team display name; falls back to #id */
+async function TeamName({ id }: { id: number }) {
+  const t = await apiGetJson<Team | null>(`/teams/${id}`).catch(() => null);
+  if (!t) return <span>Team #{id}</span>;
+  const label = `${t.Name ?? `Team #${id}`}`;
   return (
-    <Link href={`/players/${id}`} className="hover:underline">
-      {p.Nickname ?? `Player #${id}`}
+    <Link href={`/teams/${id}`} className="hover:underline">
+      {label}
     </Link>
   );
 }
 
-export function SeasonPlayerStandingsSkeleton() {
+export function SeasonTeamStandingsSkeleton() {
   return (
     <div className="rounded-xl border bg-white p-4 animate-pulse space-y-3">
-      <div className="h-4 w-48 bg-neutral-200 rounded" />
+      <div className="h-4 w-40 bg-neutral-200 rounded" />
       <div className="h-3 w-full bg-neutral-200 rounded" />
       <div className="h-3 w-[92%] bg-neutral-200 rounded" />
       <div className="h-3 w-[88%] bg-neutral-200 rounded" />
@@ -57,7 +40,7 @@ export function SeasonPlayerStandingsSkeleton() {
 }
 
 // ------------------------------------------------------------
-// Sort definitions
+// Sorting
 // ------------------------------------------------------------
 
 type SortKey =
@@ -65,6 +48,7 @@ type SortKey =
   | "games"
   | "wins"
   | "losses"
+  | "ties"
   | "pf"
   | "pa"
   | "diff"
@@ -73,18 +57,29 @@ type SortKey =
 
 const sortFns: Record<
   SortKey,
-  (a: PlayerSeasonStanding, b: PlayerSeasonStanding) => number
+  (a: SeasonStanding, b: SeasonStanding) => number
 > = {
-  rank: (a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity),
+  rank: (a, b) =>
+    (b.winPct - a.winPct) ||
+    (b.pointDiff - a.pointDiff) ||
+    (b.pointsFor - a.pointsFor) ||
+    (b.games - a.games),
+
   games: (a, b) => a.games - b.games,
   wins: (a, b) => a.wins - b.wins,
   losses: (a, b) => a.losses - b.losses,
+  ties: (a, b) => a.ties - b.ties,
   pf: (a, b) => a.pointsFor - b.pointsFor,
   pa: (a, b) => a.pointsAgainst - b.pointsAgainst,
   diff: (a, b) => a.pointDiff - b.pointDiff,
   winPct: (a, b) => a.winPct - b.winPct,
-  points: (a, b) => a.wins * 2 - b.wins * 2,
+  points: (a, b) =>
+    (a.wins * 2 + a.ties) - (b.wins * 2 + b.ties), // 2/1/0 system
 };
+
+// ------------------------------------------------------------
+// Impl
+// ------------------------------------------------------------
 
 async function Impl({
   seasonId,
@@ -95,12 +90,12 @@ async function Impl({
   sortKey?: SortKey | string;
   sortDir?: "asc" | "desc";
 }) {
-  const { standings } = await fetchPlayerStats(seasonId);
+  const rows = await fetchSeasonTeamStandings(seasonId);
 
-  if (!standings.length) {
+  if (!rows.length) {
     return (
       <div className="rounded-xl border bg-white p-4 text-sm text-neutral-600">
-        No player stats yet.
+        No standings yet.
       </div>
     );
   }
@@ -108,7 +103,7 @@ async function Impl({
   const key = (sortKey as SortKey) ?? "rank";
   const dir = sortDir ?? "desc";
 
-  const sorted = standings.slice().sort((a, b) => {
+  const sorted = rows.slice().sort((a, b) => {
     const fn = sortFns[key] ?? sortFns.rank;
     const cmp = fn(a, b);
     return dir === "asc" ? cmp : -cmp;
@@ -130,7 +125,7 @@ async function Impl({
               active={key === "rank"}
               dir={dir}
             />
-            <th>Player</th>
+            <th>Team</th>
             <SortableTH
               href={sortParam("games")}
               label="GP"
@@ -149,6 +144,13 @@ async function Impl({
               href={sortParam("losses")}
               label="L"
               active={key === "losses"}
+              dir={dir}
+              numeric
+            />
+            <SortableTH
+              href={sortParam("ties")}
+              label="T"
+              active={key === "ties"}
               dir={dir}
               numeric
             />
@@ -189,21 +191,20 @@ async function Impl({
             />
           </tr>
         </thead>
-
         <tbody className="[&>tr]:border-t">
           {sorted.map((r, idx) => {
-            const rank = r.rank ?? idx + 1;
-            const points = r.wins * 2;
-
+            const points = r.wins * 2 + r.ties;
+            const rank = idx + 1;
             return (
-              <tr key={r.playerId} className="[&>td]:px-3 [&>td]:py-2">
+              <tr key={r.teamId} className="[&>td]:px-3 [&>td]:py-2">
                 <td className="text-neutral-500">{rank}</td>
                 <td className="font-medium">
-                  <PlayerName id={r.playerId} />
+                  <TeamName id={r.teamId} />
                 </td>
                 <td className="text-right">{r.games}</td>
                 <td className="text-right">{r.wins}</td>
                 <td className="text-right">{r.losses}</td>
+                <td className="text-right">{r.ties}</td>
                 <td className="text-right">{r.pointsFor}</td>
                 <td className="text-right">{r.pointsAgainst}</td>
                 <td className="text-right">{r.pointDiff}</td>
@@ -226,8 +227,8 @@ type Comp = (p: {
   sortDir?: "asc" | "desc";
 }) => Promise<JSX.Element>;
 
-const SeasonPlayerStandingsTable = Object.assign(Impl as Comp, {
-  Skeleton: SeasonPlayerStandingsSkeleton,
+const SeasonTeamStandingsTable = Object.assign(Impl as Comp, {
+  Skeleton: SeasonTeamStandingsSkeleton,
 });
 
-export default SeasonPlayerStandingsTable;
+export default SeasonTeamStandingsTable;

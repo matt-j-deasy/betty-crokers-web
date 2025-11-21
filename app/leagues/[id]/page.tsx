@@ -2,8 +2,11 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { apiGetJson } from "@/app/lib/api";
-import { League, Season } from "@/app/lib/types";
+import { League, Season, SessionWithUser } from "@/app/lib/types";
 import SeasonCard from "@/app/components/SeasonCard";
+import SeasonCreateForm from "../ui/SeasonCreateForm";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/lib/auth";
 
 export const metadata = { title: "League — Betty Crockers" };
 
@@ -22,6 +25,8 @@ async function fetchLeagueSeasons(leagueId: string | number): Promise<Season[]> 
 }
 
 export default async function LeaguePage(props: { params: Promise<{ id: string }> }) {
+    const session: SessionWithUser | null = await getServerSession(authOptions)
+    const isAdmin = session?.user?.role === "admin";
   const params = await props.params;
   const id = params.id;
   const [league, seasons] = await Promise.all([fetchLeague(id), fetchLeagueSeasons(id)]);
@@ -36,25 +41,30 @@ export default async function LeaguePage(props: { params: Promise<{ id: string }
         </div>
       </header>
 
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Seasons</h2>
-          {/* <Link className="text-sm text-blue-600 hover:underline" href={`/leagues/${league.ID}/seasons`}>
-            View all seasons
-          </Link> */}
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Seasons</h2>
+          </div>
+
+          {seasons.length === 0 ? (
+            <div className="rounded-xl border bg-white p-4 text-sm text-neutral-600">
+              No seasons created for this league yet.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {seasons.map((s) => (
+                <Suspense key={s.ID} fallback={<SeasonCard.Skeleton />}>
+                  <SeasonCard seasonId={s.ID} />
+                </Suspense>
+              ))}
+            </div>
+          )}
         </div>
 
-        {seasons.length === 0 ? (
-          <div className="rounded-xl border bg-white p-4 text-sm text-neutral-600">
-            No seasons created for this league yet.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {seasons.map((s) => (
-              <Suspense key={s.ID} fallback={<SeasonCard.Skeleton />}>
-                <SeasonCard seasonId={s.ID} />
-              </Suspense>
-            ))}
+{isAdmin && (
+          <div className="lg:col-span-1">
+            <SeasonCreateForm leagueId={league.ID} />
           </div>
         )}
       </section>
