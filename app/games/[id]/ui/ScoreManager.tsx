@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import type { Side } from "@/app/lib/types";
 
 type Status = "scheduled" | "in_progress" | "completed" | "canceled";
+type DiscColor = "white" | "black" | "natural";
 
 type Props = {
   gameId: number;
@@ -19,18 +20,28 @@ type Props = {
   sideBLabel: string;
   sideAPoints: number;
   sideBPoints: number;
-  sideAColor: "white" | "black" | "natural";
-  sideBColor: "white" | "black" | "natural";
+  sideAColor: DiscColor;
+  sideBColor: DiscColor;
   location: string;
   description: string;
 };
 
+const COLOR_OPTIONS: { value: DiscColor; label: string }[] = [
+  { value: "white", label: "White" },
+  { value: "black", label: "Black" },
+  { value: "natural", label: "Natural" },
+];
+
 export default function ScoreManager(p: Props) {
   const router = useRouter();
   const target = p.targetPoints; // constant for now
+
   const [status, setStatus] = useState<Status>(p.status);
   const [location, setLocation] = useState(p.location);
   const [description, setDescription] = useState(p.description);
+  const [sideAColor, setSideAColor] = useState<DiscColor>(p.sideAColor);
+  const [sideBColor, setSideBColor] = useState<DiscColor>(p.sideBColor);
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,12 +49,16 @@ export default function ScoreManager(p: Props) {
     try {
       setBusy(true);
       setError(null);
+
       const body = {
         targetPoints: target,
         status,
         location: location || null,
         description: description || null,
+        sideAColor,
+        sideBColor,
       };
+
       const res = await fetch(`/api/games/${p.gameId}`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
@@ -68,7 +83,7 @@ export default function ScoreManager(p: Props) {
           gameId={p.gameId}
           side="A"
           label={p.sideALabel}
-          color={p.sideAColor}
+          color={sideAColor}
           initialPoints={p.sideAPoints}
           maxPoints={target || 100}
           disabled={scoringDisabled}
@@ -77,7 +92,7 @@ export default function ScoreManager(p: Props) {
           gameId={p.gameId}
           side="B"
           label={p.sideBLabel}
-          color={p.sideBColor}
+          color={sideBColor}
           initialPoints={p.sideBPoints}
           maxPoints={target || 100}
           disabled={scoringDisabled}
@@ -88,6 +103,7 @@ export default function ScoreManager(p: Props) {
       <div className="rounded-lg border p-3 space-y-3">
         <h3 className="font-semibold">Game Settings</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* Status */}
           <div className="space-y-1">
             <label className="text-sm">Status</label>
             <select
@@ -100,6 +116,8 @@ export default function ScoreManager(p: Props) {
               <option value="completed">Completed</option>
             </select>
           </div>
+
+          {/* Location */}
           <div className="space-y-1">
             <label className="text-sm">Location</label>
             <input
@@ -109,13 +127,72 @@ export default function ScoreManager(p: Props) {
               placeholder="Vasen"
             />
           </div>
-          <div className="space-y-1">
+
+          {/* Description */}
+          <div className="space-y-1 md:col-span-2">
             <label className="text-sm">Description</label>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full rounded border px-2 py-1"
             />
+          </div>
+
+          {/* Colors */}
+          <div className="space-y-1">
+            <label className="text-sm">Side A Color</label>
+            <div className="flex items-center gap-2">
+              <span
+                className="h-4 w-4 rounded-full border"
+                style={{
+                  backgroundColor:
+                    sideAColor === "white"
+                      ? "#ffffff"
+                      : sideAColor === "black"
+                      ? "#000000"
+                      : "#d1b892", // natural-ish
+                }}
+              />
+              <select
+                value={sideAColor}
+                onChange={(e) => setSideAColor(e.target.value as DiscColor)}
+                className="flex-1 rounded border px-2 py-1"
+              >
+                {COLOR_OPTIONS.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm">Side B Color</label>
+            <div className="flex items-center gap-2">
+              <span
+                className="h-4 w-4 rounded-full border"
+                style={{
+                  backgroundColor:
+                    sideBColor === "white"
+                      ? "#ffffff"
+                      : sideBColor === "black"
+                      ? "#000000"
+                      : "#d1b892",
+                }}
+              />
+              <select
+                value={sideBColor}
+                onChange={(e) => setSideBColor(e.target.value as DiscColor)}
+                className="flex-1 rounded border px-2 py-1"
+              >
+                {COLOR_OPTIONS.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
