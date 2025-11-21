@@ -1,6 +1,7 @@
 // app/components/SeasonStandingsTable.tsx
 import { apiGetJson } from "@/app/lib/api";
-import { SeasonStanding } from "@/app/lib/types";
+import { SeasonStanding, Team } from "@/app/lib/types";
+import Link from "next/link";
 import { JSX } from "react";
 
 async function fetchSeasonStandings(seasonId: string | number): Promise<SeasonStanding[]> {
@@ -10,6 +11,14 @@ async function fetchSeasonStandings(seasonId: string | number): Promise<SeasonSt
   ).catch(() => ({ data: [] as SeasonStanding[] }));
 
   return Array.isArray(res) ? res : res?.data ?? [];
+}
+
+/** Small server helper to render a player's display name; falls back to #id */
+async function TeamName({ id }: { id: number }) {
+  const t = await apiGetJson<Team | null>(`/teams/${id}`).catch(() => null);
+  if (!t) return <span>Team #{id}</span>;
+  const label = `${t.Name ?? `Team #${id}`}`;
+  return <Link href={`/teams/${id}`} className="hover:underline">{label}</Link>;
 }
 
 export function SeasonStandingsSkeleton() {
@@ -70,7 +79,7 @@ async function Impl({ seasonId }: { seasonId: string | number }) {
               return (
                 <tr key={r.teamId} className="[&>td]:px-3 [&>td]:py-2">
                   <td className="text-neutral-500">{idx + 1}</td>
-                  <td className="font-medium">{r.teamName}</td>
+                  <td className="font-medium"><TeamName id={r.teamId} /></td>
                   <td className="text-right">{r.games}</td>
                   <td className="text-right">{r.wins}</td>
                   <td className="text-right">{r.losses}</td>

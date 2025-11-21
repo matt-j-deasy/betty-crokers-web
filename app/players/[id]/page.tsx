@@ -26,7 +26,7 @@ async function fetchPlayerTeams(id: number): Promise<Team[]> {
 
 async function fetchRecentGames(id: number): Promise<Game[]> {
   // Assumes: GET /games?playerId=X&limit=25 -> Game[] or { data: Game[] }
-  const res = await apiGetJson<Game[] | { data: Game[] }>(`/games?playerId=${id}&limit=25`).catch(
+  const res = await apiGetJson<Game[] | { data: Game[] }>(`/games?player_id=${id}&limit=25`).catch(
     () => ({ data: [] as Game[] })
   );
   return Array.isArray(res) ? res : res?.data ?? [];

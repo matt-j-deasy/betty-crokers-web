@@ -21,7 +21,7 @@ async function fetchPlayerStandings(seasonId: string | number) {
 async function PlayerName({ id }: { id: number }) {
   const p = await apiGetJson<Player | null>(`/players/${id}`).catch(() => null);
   if (!p) return <span>Player #{id}</span>;
-  const label = `${p.FirstName ?? p.LastName ?? `Player #${id}`}`;
+  const label = `${p.Nickname ?? `Player #${id}`}`;
   return <Link href={`/players/${id}`} className="hover:underline">{label}</Link>;
 }
 
