@@ -3,6 +3,7 @@ import Link from "next/link";
 import { apiGetJson } from "../lib/api";
 import { League } from "../lib/types";
 import { JSX } from "react";
+import LocalTime from "./LocalTime";
 
 async function fetchLeague(id: string | number): Promise<League | null> {
   const res = await apiGetJson<League>(`/leagues/${id}`).catch(() => null);
@@ -29,15 +30,15 @@ async function Impl({ leagueId }: { leagueId: string | number }) {
     );
   }
 
-  const created = league.CreatedAt ? new Date(league.CreatedAt).toLocaleDateString() : "";
-
   return (
     <Link
       href={`/leagues/${league.ID}`}
       className="block rounded-2xl border bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
     >
       <div className="font-semibold truncate">{league.Name ?? `League #${league.ID}`}</div>
-      {created && <div className="text-xs text-neutral-500 mt-1">Created {created}</div>}
+      <div className="text-xs text-neutral-500 mt-1">
+        <LocalTime iso={league.CreatedAt} />
+      </div>
     </Link>
   );
 }

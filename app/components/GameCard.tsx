@@ -3,6 +3,7 @@ import Link from "next/link";
 import { apiGetJson } from "../lib/api";
 import { JSX } from "react";
 import { Team, GameWithSides } from "../lib/types";
+import LocalTime from "./LocalTime";
 
 /** ---- Data fetchers ---- */
 async function fetchGameWithSides(id: number): Promise<GameWithSides | null> {
@@ -58,13 +59,6 @@ async function Impl({ gameId }: { gameId: number }) {
   const aPoints = typeof sideA?.Points === "number" ? sideA.Points : "–";
   const bPoints = typeof sideB?.Points === "number" ? sideB.Points : "–";
 
-  const when = (() => {
-    const ts = game.CreatedAt;
-    if (!ts) return "TBD";
-    const d = new Date(ts);
-    return d.toLocaleString();
-  })();
-
   const winnerSide = game.WinnerSide === "A" || game.WinnerSide === "B" ? game.WinnerSide : null;
 
   return (
@@ -75,7 +69,9 @@ async function Impl({ gameId }: { gameId: number }) {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="font-semibold truncate">Game #{game.ID}</div>
-          <div className="text-xs text-neutral-500">{when}</div>
+          <div className="text-xs text-neutral-500 mt-1">
+            <LocalTime iso={game.CreatedAt} />
+          </div>
 
           <div className="mt-3 space-y-2 text-sm">
             <div className="flex items-center justify-between gap-3">
