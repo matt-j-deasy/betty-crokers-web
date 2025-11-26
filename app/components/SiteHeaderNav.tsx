@@ -28,7 +28,6 @@ export default function SiteHeader() {
     if (open) {
       const prev = body.style.overflow;
       body.style.overflow = "hidden";
-      // focus first link after open anim
       const id = window.setTimeout(() => firstLinkRef.current?.focus(), 150);
       return () => {
         body.style.overflow = prev;
@@ -62,20 +61,33 @@ export default function SiteHeader() {
   }, [open]);
 
   return (
-    <header className="border-b bg-white">
+    <header className="border-b bg-white" role="banner">
       <div className="mx-auto max-w-6xl p-4 flex items-center justify-between">
-        <Link href="/" className="font-semibold">Crok America</Link>
+        <Link href="/" className="font-semibold">
+          Crok America
+        </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-4 text-sm">
-          {NAV_ITEMS.map(item => (
-            <Link key={item.href} href={item.href} className="hover:text-black/80">
+        <nav
+          className="hidden md:flex items-center gap-4 text-sm"
+          aria-label="Primary"
+        >
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="hover:text-black/80"
+            >
               {item.label}
             </Link>
           ))}
-          {/* Keep your existing user menu on desktop */}
-          <span className="inline-flex">
-            {/* This stays as-is from your project */}
+
+          {/* User menu / avatar (logged-in state) */}
+          <span
+            className="inline-flex"
+            data-testid="topnav-user-menu"
+            aria-label="User menu"
+          >
             <UserMenu />
           </span>
         </nav>
@@ -99,6 +111,7 @@ export default function SiteHeader() {
           id="mobile-nav"
           aria-modal="true"
           role="dialog"
+          aria-labelledby="mobile-nav-title"
           className="fixed inset-0 z-50"
         >
           {/* Backdrop */}
@@ -106,34 +119,37 @@ export default function SiteHeader() {
 
           {/* Panel */}
           <div
-  ref={panelRef}
-  className="absolute top-0 right-0 w-[80%] max-w-sm bg-white shadow-xl p-6 flex flex-col gap-6 animate-[slideIn_.2s_ease]"
->
-  <div className="flex items-center justify-between">
-    <span className="font-semibold">Menu</span>
-    <button
-      type="button"
-      aria-label="Close navigation menu"
-      className="rounded-lg p-2 hover:bg-black/5"
-      onClick={() => setOpen(false)}
-    >
-      <CloseIcon />
-    </button>
-  </div>
+            ref={panelRef}
+            className="absolute top-0 right-0 w-[80%] max-w-sm bg-white shadow-xl p-6 flex flex-col gap-6 animate-[slideIn_.2s_ease]"
+          >
+            <div className="flex items-center justify-between">
+              <span id="mobile-nav-title" className="font-semibold">
+                Menu
+              </span>
+              <button
+                type="button"
+                aria-label="Close navigation menu"
+                className="rounded-lg p-2 hover:bg-black/5"
+                onClick={() => setOpen(false)}
+              >
+                <CloseIcon />
+              </button>
+            </div>
 
-  <nav className="flex flex-col text-base">
-    {MOBILE_NAV_ITEMS.map((item) => (
-      <Link
-        key={item.href}
-        href={item.href}
-        className="rounded-lg px-3 py-3 hover:bg-neutral-100"
-        onClick={() => setOpen(false)}
-      >
-        {item.label}
-      </Link>
-    ))}
-  </nav>
-</div>
+            <nav className="flex flex-col text-base" aria-label="Mobile primary">
+              {MOBILE_NAV_ITEMS.map((item, index) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-lg px-3 py-3 hover:bg-neutral-100"
+                  onClick={() => setOpen(false)}
+                  ref={index === 0 ? firstLinkRef : undefined}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
       )}
     </header>
@@ -143,7 +159,12 @@ export default function SiteHeader() {
 function HamburgerIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path
+        d="M3 6h18M3 12h18M3 18h18"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -151,7 +172,12 @@ function HamburgerIcon() {
 function CloseIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path
+        d="M6 6l12 12M18 6l-12 12"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
